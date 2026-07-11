@@ -435,13 +435,16 @@
 
 <script>
 const PEOPLE = {
-  dad:    { name:'Dad',   color:'var(--c-dad)',    ink:'var(--c-dad-ink)',    initial:'D' },
-  mum:    { name:'Mum',   color:'var(--c-mum)',    ink:'var(--c-mum-ink)',    initial:'M' },
-  kids:   { name:'Kids',  color:'var(--c-kids)',   ink:'var(--c-kids-ink)',   initial:'K' },
-  shared: { name:'Shared',color:'var(--c-shared)', ink:'var(--c-shared-ink)', initial:'S' },
+  dad:    { name:'Jonny',    color:'var(--c-dad)',    ink:'var(--c-dad-ink)',    initial:'J' },
+  mum:    { name:'Catherine',color:'var(--c-mum)',    ink:'var(--c-mum-ink)',    initial:'C' },
+  shared: { name:'Shared',   color:'var(--c-shared)', ink:'var(--c-shared-ink)', initial:'S' },
 };
 
-// Set to the tablet's actual location. Defaults to London — easy to change.
+// URL of the Cloudflare Worker that merges the Google Calendar feeds.
+// Leave blank to keep showing demo/placeholder events.
+const CALENDAR_FEED_URL = '';
+
+// Set to the tablet's actual location. Defaults to Newtownabbey.
 const LOCATION = { name:'Newtownabbey', lat:54.6779, lon:-5.9249 };
 
 const WEATHER_ICONS = {
@@ -463,13 +466,64 @@ const HOURS = HOUR_END - HOUR_START;
 let seed = 11;
 function rand(){ seed = (seed*9301+49297)%233280; return seed/233280; }
 
+let LIVE_EVENTS = null; // populated once the Worker feed loads successfully
+
+async function loadCalendarData(){
+  if(!CALENDAR_FEED_URL) return; // no feed configured yet — stay in demo mode
+  try{
+    const res = await fetch(CALENDAR_FEED_URL);
+    if(!res.ok) throw new Error('feed returned ' + res.status);
+    const data = await res.json();
+    LIVE_EVENTS = data.events.map(e => ({
+      person: e.person,
+      title: e.title,
+      start: new Date(e.start),
+      end: new Date(e.end),
+      allDay: !!e.allDay
+    }));
+  } catch(err){
+    console.error('Calendar feed error:', err);
+    // keep showing whatever we last had (or demo mode if this was the first load)
+  }
+}
+
+function dateKey(y,m,d){ return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
+
+function eventsOnDate(y, m, d){
+  if(!LIVE_EVENTS) return null;
+  const key = dateKey(y,m,d);
+  return LIVE_EVENTS.filter(ev => dateKey(ev.start.getUTCFullYear(), ev.start.getUTCMonth(), ev.start.getUTCDate()) === key);
+}
+
+function clampHour(h, minVal){
+  let v = Math.max(HOUR_START, Math.min(HOUR_END, h));
+  if(minVal !== undefined) v = Math.max(v, minVal);
+  return v;
+}
+
 function buildWeekEvents(weekDates){
+  if(LIVE_EVENTS){
+    return weekDates.map(d => {
+      const list = eventsOnDate(d.getFullYear(), d.getMonth(), d.getDate()) || [];
+      return list.map(ev => {
+        if(ev.allDay){
+          return { person: ev.person, title: ev.title, start: HOUR_START, end: HOUR_START + 0.75 };
+        }
+        const start = clampHour(ev.start.getUTCHours() + ev.start.getUTCMinutes()/60);
+        const end = clampHour(ev.end.getUTCHours() + ev.end.getUTCMinutes()/60, start + 0.5);
+        return { person: ev.person, title: ev.title, start, end };
+      });
+    });
+  }
+  return buildWeekEventsMock(weekDates);
+}
+
+function buildWeekEventsMock(weekDates){
   const titles = [
-    ['dad','Site visit — Belfast'], ['mum','School run'], ['kids','Swimming lesson'],
-    ['shared','Family dinner'], ['dad','Client call'], ['mum','Physio'],
-    ['kids','Football practice'], ['shared','Bins out'], ['dad','Table tennis'],
-    ['mum','Coffee w/ Claire'], ['shared','Grandma visiting'], ['kids','Piano lesson'],
-    ['dad','Gym — legs day'], ['mum','Book club'], ['kids','Half term starts'],
+    ['dad','Site visit — Belfast'], ['mum','School run'], ['shared','Family dinner'],
+    ['dad','Client call'], ['mum','Physio'], ['shared','Bins out'], ['dad','Table tennis'],
+    ['mum','Coffee w/ Claire'], ['shared','Grandma visiting'],
+    ['dad','Gym — legs day'], ['mum','Book club'], ['shared','Half term starts'],
   ];
   const days = [];
   for(let d=0; d<7; d++){
@@ -520,8 +574,9 @@ function getMonday(d){
 }
 
 function renderPeopleRow(weekEventsByDay){
-  const counts = { dad:0, mum:0, kids:0, shared:0 };
-  weekEventsByDay.forEach(day => day.forEach(ev => counts[ev.person]++));
+  const counts = {};
+  Object.keys(PEOPLE).forEach(k => counts[k] = 0);
+  weekEventsByDay.forEach(day => day.forEach(ev => { if(counts[ev.person] !== undefined) counts[ev.person]++; }));
   const total = Math.max(1, Math.max(...Object.values(counts)));
   const row = document.getElementById('peopleRow');
   row.innerHTML = '';
@@ -608,11 +663,23 @@ function renderWeek(){
   });
 }
 
-function buildMonthEvents(daysInMonth){
+function buildMonthEvents(daysInMonth, year, month){
+  if(LIVE_EVENTS){
+    const events = {};
+    for(let d=1; d<=daysInMonth; d++){
+      const list = eventsOnDate(year, month, d);
+      if(list && list.length) events[d] = list.map(ev => [ev.person, ev.title]);
+    }
+    return events;
+  }
+  return buildMonthEventsMock(daysInMonth);
+}
+
+function buildMonthEventsMock(daysInMonth){
   const pool = [
-    ['dad','Site visit'], ['mum','School run'], ['kids','Swimming'], ['shared','Family dinner'],
-    ['dad','Client call'], ['mum','Physio'], ['kids','Football'], ['shared','Bins out'],
-    ['dad','Table tennis'], ['mum','Coffee w/ Claire'], ['shared','Grandma visiting'], ['kids','Half term'],
+    ['dad','Site visit'], ['mum','School run'], ['shared','Family dinner'],
+    ['dad','Client call'], ['mum','Physio'], ['shared','Bins out'],
+    ['dad','Table tennis'], ['mum','Coffee w/ Claire'], ['shared','Grandma visiting'],
   ];
   const events = {};
   for(let d=1; d<=daysInMonth; d++){
@@ -632,7 +699,7 @@ function renderMonth(){
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const daysInPrevMonth = new Date(year, month, 0).getDate();
   const totalCells = Math.ceil((startOffset+daysInMonth)/7)*7;
-  const events = buildMonthEvents(daysInMonth);
+  const events = buildMonthEvents(daysInMonth, year, month);
 
   const grid = document.getElementById('monthGrid');
   grid.innerHTML = '';
@@ -792,18 +859,23 @@ document.getElementById('toggleWeek').onclick = ()=>setView('week');
 document.getElementById('toggleMonth').onclick = ()=>setView('month');
 document.getElementById('railWeek').onclick = ()=>setView('week');
 document.getElementById('railMonth').onclick = ()=>setView('month');
-document.getElementById('btnToday').onclick = ()=>{ renderWeek(); renderMonth(); };
+document.getElementById('btnToday').onclick = ()=>refreshAll();
 
 function tickClock(){
   document.getElementById('clock').textContent =
     new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
 }
 
-renderWeek();
-renderMonth();
+async function refreshAll(){
+  await loadCalendarData();
+  renderWeek();
+  renderMonth();
+}
+
+refreshAll();
 tickClock();
 setInterval(tickClock, 1000);
-setInterval(()=>{ renderWeek(); renderMonth(); }, 10*60*1000);
+setInterval(refreshAll, 10*60*1000);
 </script>
 
 </body>
