@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Family Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FAF8F5;
+    --panel: #FFFFFF;
+    --line: #ECE7DF;
+    --ink: #2E2B27;
+    --ink-dim: #B5AFA6;
+    --ink-mid: #8B857C;
+    --today-red: #E8604C;
+
+    --c-dad: #F6A9A0;
+    --c-dad-ink: #9C3F35;
+    --c-mum: #7FCFC1;
+    --c-mum-ink: #1F6E60;
+    --c-kids: #B7A4E3;
+    --c-kids-ink: #5B3F94;
+    --c-shared: #F6C77C;
+    --c-shared-ink: #8A5A12;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html, body{
+    width:100%; height:100%;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    overflow:hidden;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+
+  .app{ display:flex; width:100vw; height:100vh; }
+
+  /* ---------- icon rail ---------- */
+  .rail{
+    width:56px;
+    background:var(--panel);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px 0;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .rail-btn{
+    width:36px; height:36px;
+    border-radius:11px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    color:var(--ink-mid);
+  }
+  .rail-btn svg{ width:18px; height:18px; }
+  .rail-btn.active{ background:#2E2B27; color:#fff; }
+  .rail-spacer{ flex:1; }
+
+  /* ---------- main column ---------- */
+  .main{ flex:1; display:flex; flex-direction:column; min-width:0; padding:18px 24px 14px; }
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-bottom:14px;
+  }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand-name{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:26px;
+  }
+  .brand-clock{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:15px;
+    color:var(--ink-mid);
+  }
+  .brand-weather{
+    font-size:14px;
+    color:var(--ink-mid);
+    display:flex; align-items:center; gap:5px;
+    cursor:pointer;
+    padding:4px 10px;
+    border-radius:8px;
+  }
+  .brand-weather:active{ background:var(--line); }
+  .topbar-right{ display:flex; align-items:center; gap:18px; }
+
+  .view-toggle{
+    display:flex;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:3px;
+    gap:2px;
+  }
+  .view-toggle button{
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    border:none;
+    background:transparent;
+    color:var(--ink-mid);
+    padding:6px 14px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .view-toggle button.active{
+    background:var(--ink);
+    color:#fff;
+  }
+
+  /* ---------- people row ---------- */
+  .people-row{
+    display:flex;
+    gap:22px;
+    padding:2px 2px 14px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:12px;
+  }
+  .person{ display:flex; align-items:center; gap:9px; }
+  .avatar{
+    width:30px; height:30px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:12px;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .person-info{ display:flex; flex-direction:column; gap:4px; min-width:90px; }
+  .person-name{ font-size:12.5px; font-weight:600; }
+  .person-bar-track{
+    width:90px; height:5px; border-radius:3px; background:var(--line); overflow:hidden;
+  }
+  .person-bar-fill{ height:100%; border-radius:3px; }
+  .person-count{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--ink-mid); }
+
+  /* ---------- shared view container ---------- */
+  .view{ flex:1; min-height:0; display:flex; flex-direction:column; }
+  .view[hidden]{ display:none; }
+
+  /* ================= WEEK VIEW ================= */
+  .week-header{
+    display:grid;
+    grid-template-columns: 52px repeat(7, 1fr);
+    padding-bottom:8px;
+  }
+  .week-header .corner{}
+  .week-header .day-head{
+    text-align:center;
+    padding:4px 0 8px;
+  }
+  .day-head .dname{
+    font-size:11.5px;
+    letter-spacing:1px;
+    color:var(--ink-mid);
+    font-weight:600;
+  }
+  .day-head .dnum{
+    font-family:'Quicksand', sans-serif;
+    font-size:16px;
+    font-weight:700;
+    margin-top:2px;
+    display:inline-flex;
+    align-items:center; justify-content:center;
+    width:26px; height:26px;
+    border-radius:50%;
+  }
+  .day-head.today .dnum{ background:var(--today-red); color:#fff; }
+
+  .week-body{
+    flex:1;
+    display:grid;
+    grid-template-columns: 52px repeat(7, 1fr);
+    min-height:0;
+    position:relative;
+  }
+
+  .hour-col{
+    display:grid;
+    grid-template-rows: repeat(var(--hours), 1fr);
+  }
+  .hour-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    color:var(--ink-mid);
+    text-align:right;
+    padding-right:8px;
+    transform: translateY(-6px);
+  }
+
+  .day-col{
+    position:relative;
+    border-left:1px solid var(--line);
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent, transparent calc(100%/var(--hours) - 1px),
+      var(--line) calc(100%/var(--hours) - 1px), var(--line) calc(100%/var(--hours))
+    );
+  }
+  .day-col.today-col{ background-color: #FFF7F0; }
+
+  .event-block{
+    position:absolute;
+    border-radius:9px;
+    padding:6px 8px 5px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+  }
+  .event-block .etitle{
+    font-size:11.5px;
+    font-weight:700;
+    line-height:1.2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .event-block .etime{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    opacity:0.85;
+    white-space:nowrap;
+  }
+  .event-block .edot{
+    position:absolute;
+    bottom:6px; right:7px;
+    width:14px; height:14px;
+    border-radius:50%;
+  }
+
+  /* ================= MONTH VIEW ================= */
+  .month-weekdays{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    padding-bottom:6px;
+  }
+  .month-weekdays div{
+    text-align:center;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink-mid);
+    letter-spacing:1px;
+  }
+  .month-grid{
+    flex:1;
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:6px;
+    min-height:0;
+  }
+  .mcell{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:6px 7px;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    overflow:hidden;
+  }
+  .mcell.outside{ opacity:0.35; }
+  .mcell .mdate{
+    font-family:'Quicksand', sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-mid);
+    margin-bottom:3px;
+  }
+  .mcell.today .mdate{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; border-radius:50%;
+    background:var(--today-red); color:#fff;
+  }
+  .mevents{ display:flex; flex-direction:column; gap:3px; overflow-y:auto; flex:1; min-height:0; -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
+  .mevents::-webkit-scrollbar{ width:4px; }
+  .mevents::-webkit-scrollbar-thumb{ background:var(--line); border-radius:2px; }
+  .mevents::-webkit-scrollbar-track{ background:transparent; }
+  .mevent{
+    font-size:10.5px;
+    font-weight:600;
+    border-radius:5px;
+    padding:2px 6px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .mmore{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; color:var(--ink-mid); padding-left:4px; cursor:pointer; }
+
+  .event-block, .mevent{ cursor:pointer; }
+
+  /* ---------- tap-to-expand popup ---------- */
+  .popup-backdrop{
+    position:fixed; inset:0;
+    background:rgba(46,43,39,0.35);
+    display:flex; align-items:center; justify-content:center;
+    z-index:50;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.15s ease;
+  }
+  .popup-backdrop.open{ opacity:1; pointer-events:auto; }
+
+  .popup-card{
+    background:#fff;
+    border-radius:16px;
+    min-width:280px;
+    max-width:420px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+    overflow:hidden;
+    transform:scale(0.96);
+    transition:transform 0.15s ease;
+  }
+  .popup-backdrop.open .popup-card{ transform:scale(1); }
+
+  .popup-bar{ height:8px; width:100%; }
+  .popup-body{ padding:20px 22px 18px; }
+  .popup-title{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:20px;
+    margin-bottom:8px;
+    line-height:1.25;
+  }
+  .popup-meta{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:var(--ink-mid);
+  }
+  .popup-meta .pdot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .popup-list-item{
+    display:flex; align-items:center; gap:10px;
+    padding:9px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .popup-list-item:last-child{ border-bottom:none; }
+  .popup-list-item .pdot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .popup-list-item .ptitle{ font-weight:600; font-size:14px; flex:1; }
+  .popup-list-item .ptime{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-mid); }
+  .popup-hint{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--ink-mid);
+    padding:10px 0 4px;
+  }
+
+  .popup-card.wide{ max-width:640px; }
+  .forecast-row{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:4px;
+  }
+  .forecast-day{
+    flex:1;
+    min-width:56px;
+    text-align:center;
+    background:var(--bg);
+    border-radius:10px;
+    padding:10px 4px 9px;
+  }
+  .forecast-day.today{ background:#FFF1E6; }
+  .forecast-day .fname{ font-size:11px; font-weight:700; color:var(--ink-mid); margin-bottom:4px; }
+  .forecast-day .ficon{ font-size:22px; margin-bottom:4px; }
+  .forecast-day .fhigh{ font-size:13px; font-weight:700; }
+  .forecast-day .flow{ font-size:11.5px; color:var(--ink-mid); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail">
+    <div class="rail-btn" id="btnToday" title="Jump to today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/></svg>
+    </div>
+    <div class="rail-btn active" id="railWeek" title="Week view">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 4v-1M16 4v-1"/></svg>
+    </div>
+    <div class="rail-btn" id="railMonth" title="Month view">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18"/><path d="M9 14h.01M13 14h.01M17 14h.01M9 17h.01M13 17h.01"/></svg>
+    </div>
+    <div class="rail-spacer"></div>
+    <div class="rail-btn" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-name">Spence Family</div>
+        <div class="brand-clock" id="clock">--:--</div>
+        <div class="brand-weather" id="weatherBtn">
+          <span id="weatherIcon">⛅</span><span id="weatherTemp">--°</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="view-toggle">
+          <button id="toggleWeek" class="active">Week</button>
+          <button id="toggleMonth">Month</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="people-row" id="peopleRow"></div>
+
+    <div class="view" id="weekView">
+      <div class="week-header" id="weekHeader"></div>
+      <div class="week-body" id="weekBody"></div>
+    </div>
+
+    <div class="view" id="monthView" hidden>
+      <div class="month-weekdays">
+        <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
+      </div>
+      <div class="month-grid" id="monthGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="popup-backdrop" id="popupBackdrop">
+  <div class="popup-card" id="popupCard"></div>
+</div>
+
+<script>
+const PEOPLE = {
+  dad:    { name:'Dad',   color:'var(--c-dad)',    ink:'var(--c-dad-ink)',    initial:'D' },
+  mum:    { name:'Mum',   color:'var(--c-mum)',    ink:'var(--c-mum-ink)',    initial:'M' },
+  kids:   { name:'Kids',  color:'var(--c-kids)',   ink:'var(--c-kids-ink)',   initial:'K' },
+  shared: { name:'Shared',color:'var(--c-shared)', ink:'var(--c-shared-ink)', initial:'S' },
+};
+
+// Set to the tablet's actual location. Defaults to London — easy to change.
+const LOCATION = { name:'Newtownabbey', lat:54.6779, lon:-5.9249 };
+
+const WEATHER_ICONS = {
+  0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
+  45:'🌫️', 48:'🌫️',
+  51:'🌦️', 53:'🌦️', 55:'🌦️',
+  61:'🌧️', 63:'🌧️', 65:'🌧️',
+  71:'🌨️', 73:'🌨️', 75:'🌨️',
+  80:'🌦️', 81:'🌧️', 82:'⛈️',
+  95:'⛈️', 96:'⛈️', 99:'⛈️',
+};
+function weatherIcon(code){ return WEATHER_ICONS[code] || '🌡️'; }
+
+const HOUR_START = 7;
+const HOUR_END = 21;
+const HOURS = HOUR_END - HOUR_START;
+
+// ---------- seeded rng so layout is stable across renders ----------
+let seed = 11;
+function rand(){ seed = (seed*9301+49297)%233280; return seed/233280; }
+
+function buildWeekEvents(weekDates){
+  const titles = [
+    ['dad','Site visit — Belfast'], ['mum','School run'], ['kids','Swimming lesson'],
+    ['shared','Family dinner'], ['dad','Client call'], ['mum','Physio'],
+    ['kids','Football practice'], ['shared','Bins out'], ['dad','Table tennis'],
+    ['mum','Coffee w/ Claire'], ['shared','Grandma visiting'], ['kids','Piano lesson'],
+    ['dad','Gym — legs day'], ['mum','Book club'], ['kids','Half term starts'],
+  ];
+  const days = [];
+  for(let d=0; d<7; d++){
+    const count = rand() < 0.1 ? 0 : (rand() < 0.5 ? 1 : (rand() < 0.85 ? 2 : 3));
+    const evs = [];
+    let cursor = HOUR_START + rand()*2;
+    for(let i=0;i<count;i++){
+      const [person, title] = titles[Math.floor(rand()*titles.length)];
+      const dur = 0.75 + rand()*1.5;
+      const start = Math.min(cursor, HOUR_END-1);
+      const end = Math.min(start+dur, HOUR_END);
+      evs.push({ person, title, start, end });
+      cursor = end + 0.5 + rand()*1.5;
+    }
+    days.push(evs);
+  }
+  return days;
+}
+
+function layoutOverlaps(events){
+  const sorted = [...events].sort((a,b)=>a.start-b.start);
+  const cols = [];
+  sorted.forEach(ev => {
+    let placed = false;
+    for(const col of cols){
+      if(col[col.length-1].end <= ev.start){ col.push(ev); ev._col = cols.indexOf(col); placed = true; break; }
+    }
+    if(!placed){ cols.push([ev]); ev._col = cols.length-1; }
+  });
+  sorted.forEach(ev => { ev._cols = cols.length; });
+  return sorted;
+}
+
+function fmtTime(h){
+  const hour = Math.floor(h);
+  const min = Math.round((h-hour)*60);
+  const period = hour >= 12 ? 'pm' : 'am';
+  const h12 = ((hour+11)%12)+1;
+  return h12 + (min ? ':' + String(min).padStart(2,'0') : '') + period;
+}
+
+function getMonday(d){
+  const date = new Date(d);
+  const day = (date.getDay()+6)%7;
+  date.setDate(date.getDate()-day);
+  date.setHours(0,0,0,0);
+  return date;
+}
+
+function renderPeopleRow(weekEventsByDay){
+  const counts = { dad:0, mum:0, kids:0, shared:0 };
+  weekEventsByDay.forEach(day => day.forEach(ev => counts[ev.person]++));
+  const total = Math.max(1, Math.max(...Object.values(counts)));
+  const row = document.getElementById('peopleRow');
+  row.innerHTML = '';
+  Object.entries(PEOPLE).forEach(([key,p]) => {
+    const c = counts[key];
+    const el = document.createElement('div');
+    el.className = 'person';
+    el.innerHTML =
+      '<div class="avatar" style="background:'+p.color+'">'+p.initial+'</div>'+
+      '<div class="person-info">'+
+        '<div class="person-name">'+p.name+'</div>'+
+        '<div class="person-bar-track"><div class="person-bar-fill" style="width:'+(c/total*100)+'%;background:'+p.color+'"></div></div>'+
+      '</div>'+
+      '<div class="person-count">'+c+'</div>';
+    row.appendChild(el);
+  });
+}
+
+function renderWeek(){
+  const monday = getMonday(new Date());
+  const weekDates = [...Array(7)].map((_,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return d; });
+  const todayStr = new Date().toDateString();
+
+  const events = buildWeekEvents(weekDates);
+  renderPeopleRow(events);
+
+  // header
+  const header = document.getElementById('weekHeader');
+  header.innerHTML = '<div class="corner"></div>';
+  weekDates.forEach(d => {
+    const isToday = d.toDateString() === todayStr;
+    const head = document.createElement('div');
+    head.className = 'day-head' + (isToday ? ' today' : '');
+    head.innerHTML =
+      '<div class="dname">'+d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase()+'</div>'+
+      '<div class="dnum">'+d.getDate()+'</div>';
+    header.appendChild(head);
+  });
+
+  // body
+  const body = document.getElementById('weekBody');
+  body.innerHTML = '';
+  body.style.setProperty('--hours', HOURS);
+
+  const hourCol = document.createElement('div');
+  hourCol.className = 'hour-col';
+  hourCol.style.setProperty('--hours', HOURS);
+  for(let h=HOUR_START; h<HOUR_END; h++){
+    const lbl = document.createElement('div');
+    lbl.className = 'hour-label';
+    lbl.textContent = fmtTime(h);
+    hourCol.appendChild(lbl);
+  }
+  body.appendChild(hourCol);
+
+  weekDates.forEach((d,i) => {
+    const isToday = d.toDateString() === todayStr;
+    const col = document.createElement('div');
+    col.className = 'day-col' + (isToday ? ' today-col' : '');
+    col.style.setProperty('--hours', HOURS);
+
+    const laidOut = layoutOverlaps(events[i]);
+    laidOut.forEach(ev => {
+      const top = (ev.start - HOUR_START) / HOURS * 100;
+      const height = (ev.end - ev.start) / HOURS * 100;
+      const width = 100 / ev._cols;
+      const left = ev._col * width;
+      const p = PEOPLE[ev.person];
+      const block = document.createElement('div');
+      block.className = 'event-block';
+      block.style.top = top + '%';
+      block.style.height = 'calc(' + height + '% - 3px)';
+      block.style.left = 'calc(' + left + '% + 2px)';
+      block.style.width = 'calc(' + width + '% - 5px)';
+      block.style.background = p.color;
+      block.style.color = p.ink;
+      block.innerHTML =
+        '<div class="etitle">'+ev.title+'</div>'+
+        '<div class="etime">'+fmtTime(ev.start)+' – '+fmtTime(ev.end)+'</div>';
+      block.addEventListener('click', (e) => { e.stopPropagation(); showSingleEvent(ev); });
+      col.appendChild(block);
+    });
+    body.appendChild(col);
+  });
+}
+
+function buildMonthEvents(daysInMonth){
+  const pool = [
+    ['dad','Site visit'], ['mum','School run'], ['kids','Swimming'], ['shared','Family dinner'],
+    ['dad','Client call'], ['mum','Physio'], ['kids','Football'], ['shared','Bins out'],
+    ['dad','Table tennis'], ['mum','Coffee w/ Claire'], ['shared','Grandma visiting'], ['kids','Half term'],
+  ];
+  const events = {};
+  for(let d=1; d<=daysInMonth; d++){
+    const count = rand() < 0.2 ? 0 : (rand() < 0.45 ? 1 : (rand() < 0.7 ? 2 : (rand() < 0.9 ? 3 : (rand() < 0.97 ? 4 : 5))));
+    const items = [];
+    for(let i=0;i<count;i++) items.push(pool[Math.floor(rand()*pool.length)]);
+    if(items.length) events[d] = items;
+  }
+  return events;
+}
+
+function renderMonth(){
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth(), today = now.getDate();
+  const firstOfMonth = new Date(year, month, 1);
+  const startOffset = (firstOfMonth.getDay()+6)%7;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const totalCells = Math.ceil((startOffset+daysInMonth)/7)*7;
+  const events = buildMonthEvents(daysInMonth);
+
+  const grid = document.getElementById('monthGrid');
+  grid.innerHTML = '';
+  for(let i=0;i<totalCells;i++){
+    let dayNum, outside=false, isToday=false;
+    if(i<startOffset){ dayNum = daysInPrevMonth-startOffset+i+1; outside=true; }
+    else if(i>=startOffset+daysInMonth){ dayNum = i-startOffset-daysInMonth+1; outside=true; }
+    else { dayNum = i-startOffset+1; isToday = dayNum===today; }
+
+    const cell = document.createElement('div');
+    cell.className = 'mcell'+(outside?' outside':'')+(isToday?' today':'');
+    cell.innerHTML = '<div class="mdate">'+dayNum+'</div>';
+
+    if(!outside && events[dayNum]){
+      const wrap = document.createElement('div');
+      wrap.className = 'mevents';
+      const list = events[dayNum];
+      const dayLabel = new Date(year, month, dayNum).toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long'});
+      list.forEach(([person,title])=>{
+        const p = PEOPLE[person];
+        const row = document.createElement('div');
+        row.className = 'mevent';
+        row.style.background = p.color;
+        row.style.color = p.ink;
+        row.textContent = title;
+        row.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showSingleEvent({ person, title, time: '' });
+        });
+        wrap.appendChild(row);
+      });
+      cell.appendChild(wrap);
+    }
+    grid.appendChild(cell);
+  }
+}
+
+// ---------- tap-to-expand popup ----------
+const popupBackdrop = document.getElementById('popupBackdrop');
+const popupCard = document.getElementById('popupCard');
+let popupTimer = null;
+
+function showPopup(html, barColor){
+  popupCard.classList.remove('wide');
+  popupCard.innerHTML =
+    '<div class="popup-bar" style="background:'+(barColor||'#ddd')+'"></div>'+
+    '<div class="popup-body">'+html+'</div>';
+  popupBackdrop.classList.add('open');
+  clearTimeout(popupTimer);
+  popupTimer = setTimeout(hidePopup, 8000);
+}
+
+function hidePopup(){
+  popupBackdrop.classList.remove('open');
+  clearTimeout(popupTimer);
+}
+
+popupBackdrop.addEventListener('click', (e) => {
+  if(e.target === popupBackdrop) hidePopup();
+});
+popupCard.addEventListener('click', hidePopup);
+
+function showSingleEvent(ev){
+  const p = PEOPLE[ev.person];
+  const timeStr = (ev.start !== undefined) ? fmtTime(ev.start)+' – '+fmtTime(ev.end) : ev.time;
+  const metaLine = timeStr ? (p.name+' &nbsp;·&nbsp; '+timeStr) : p.name;
+  showPopup(
+    '<div class="popup-title">'+ev.title+'</div>'+
+    '<div class="popup-meta"><span class="pdot" style="background:'+p.color+'"></span>'+metaLine+'</div>'+
+    '<div class="popup-hint">Tap anywhere to close</div>',
+    p.color
+  );
+}
+
+function showDayList(dayLabel, list){
+  const items = list.map(([person,title]) => {
+    const p = PEOPLE[person];
+    return '<div class="popup-list-item"><span class="pdot" style="background:'+p.color+'"></span>'+
+           '<span class="ptitle">'+title+'</span><span class="ptime">'+p.name+'</span></div>';
+  }).join('');
+  showPopup(
+    '<div class="popup-title">'+dayLabel+'</div>'+items+
+    '<div class="popup-hint">Tap anywhere to close</div>',
+    '#ddd'
+  );
+}
+
+// ---------- weather ----------
+let forecastCache = null;
+
+async function fetchWeather(){
+  const url = 'https://api.open-meteo.com/v1/forecast?latitude='+LOCATION.lat+'&longitude='+LOCATION.lon+
+    '&daily=weathercode,temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&forecast_days=10';
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('weather fetch failed');
+  return res.json();
+}
+
+async function loadWeather(){
+  try{
+    const data = await fetchWeather();
+    forecastCache = data;
+    document.getElementById('weatherIcon').textContent = weatherIcon(data.current_weather.weathercode);
+    document.getElementById('weatherTemp').textContent = Math.round(data.current_weather.temperature) + '°';
+  } catch(e){
+    document.getElementById('weatherIcon').textContent = '⛅';
+    document.getElementById('weatherTemp').textContent = '--°';
+  }
+}
+
+function showForecast(){
+  if(!forecastCache){
+    showPopup('<div class="popup-title">Weather unavailable</div><div class="popup-meta">Check the tablet\'s internet connection.</div><div class="popup-hint">Tap anywhere to close</div>');
+    return;
+  }
+  const days = forecastCache.daily.time;
+  const todayStr = new Date().toDateString();
+  const cards = days.map((dateStr,i) => {
+    const d = new Date(dateStr);
+    const isToday = d.toDateString() === todayStr;
+    const label = isToday ? 'Today' : d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
+    const hi = Math.round(forecastCache.daily.temperature_2m_max[i]);
+    const lo = Math.round(forecastCache.daily.temperature_2m_min[i]);
+    return '<div class="forecast-day'+(isToday?' today':'')+'">'+
+      '<div class="fname">'+label+'</div>'+
+      '<div class="ficon">'+weatherIcon(forecastCache.daily.weathercode[i])+'</div>'+
+      '<div class="fhigh">'+hi+'°</div>'+
+      '<div class="flow">'+lo+'°</div>'+
+    '</div>';
+  }).join('');
+  popupCard.classList.add('wide');
+  showPopup(
+    '<div class="popup-title">'+LOCATION.name+' — 10 day forecast</div>'+
+    '<div class="forecast-row">'+cards+'</div>'+
+    '<div class="popup-hint">Tap anywhere to close</div>'
+  );
+}
+
+document.getElementById('weatherBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  showForecast();
+});
+
+loadWeather();
+setInterval(loadWeather, 30 * 60 * 1000);
+
+function setView(view){
+  document.getElementById('weekView').hidden = view !== 'week';
+  document.getElementById('monthView').hidden = view !== 'month';
+  document.getElementById('toggleWeek').classList.toggle('active', view==='week');
+  document.getElementById('toggleMonth').classList.toggle('active', view==='month');
+  document.getElementById('railWeek').classList.toggle('active', view==='week');
+  document.getElementById('railMonth').classList.toggle('active', view==='month');
+}
+
+document.getElementById('toggleWeek').onclick = ()=>setView('week');
+document.getElementById('toggleMonth').onclick = ()=>setView('month');
+document.getElementById('railWeek').onclick = ()=>setView('week');
+document.getElementById('railMonth').onclick = ()=>setView('month');
+document.getElementById('btnToday').onclick = ()=>{ renderWeek(); renderMonth(); };
+
+function tickClock(){
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+}
+
+renderWeek();
+renderMonth();
+tickClock();
+setInterval(tickClock, 1000);
+setInterval(()=>{ renderWeek(); renderMonth(); }, 10*60*1000);
+</script>
+
+</body>
+</html>
