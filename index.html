@@ -728,6 +728,45 @@
   }
   .swatch.selected{ border-color:var(--ink); }
 
+  .kid-controls{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:10px;
+  }
+  .kid-name-input{
+    padding:8px 12px;
+    border-radius:9px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    text-align:right;
+    width:150px;
+    -webkit-user-select:text;
+    user-select:text;
+  }
+  .emoji-row{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:6px;
+    max-width:260px;
+  }
+  .emoji-option{
+    width:32px; height:32px;
+    border-radius:9px;
+    border:2px solid var(--line);
+    background:var(--bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
+    cursor:pointer;
+  }
+  .emoji-option.selected{ border-color:var(--ink); background:var(--panel); }
+
   .settings-action-btn{
     padding:9px 20px;
     border-radius:10px;
@@ -902,7 +941,7 @@
     <div class="view" id="choresView" hidden>
       <div class="chores-grid">
         <div class="chore-card" data-child="charlotte">
-          <div class="chore-card-header" style="background:var(--c-kids)">Charlotte</div>
+          <div class="chore-card-header" id="choreHeaderCharlotte"></div>
           <div class="chore-input-row">
             <input type="text" class="chore-input" placeholder="Add a chore…" autocomplete="off">
             <button class="chore-add-btn">Add</button>
@@ -910,7 +949,7 @@
           <div class="chore-items" data-items-for="charlotte"></div>
         </div>
         <div class="chore-card" data-child="sophie">
-          <div class="chore-card-header" style="background:var(--c-sophie)">Sophie</div>
+          <div class="chore-card-header" id="choreHeaderSophie"></div>
           <div class="chore-input-row">
             <input type="text" class="chore-input" placeholder="Add a chore…" autocomplete="off">
             <button class="chore-add-btn">Add</button>
@@ -999,6 +1038,30 @@
             </div>
           </div>
 
+          <div class="settings-section-title">Kids</div>
+          <div class="settings-row settings-row-stacked" data-kid="charlotte">
+            <div class="settings-label">
+              <div class="settings-title">Charlotte</div>
+              <div class="settings-sub">Name, colour, and emoji shown on her chores card</div>
+            </div>
+            <div class="kid-controls">
+              <input type="text" class="kid-name-input" data-kid="charlotte">
+              <div class="swatch-row" data-kid="charlotte"></div>
+              <div class="emoji-row" data-kid="charlotte"></div>
+            </div>
+          </div>
+          <div class="settings-row settings-row-stacked" data-kid="sophie">
+            <div class="settings-label">
+              <div class="settings-title">Sophie</div>
+              <div class="settings-sub">Name, colour, and emoji shown on her chores card</div>
+            </div>
+            <div class="kid-controls">
+              <input type="text" class="kid-name-input" data-kid="sophie">
+              <div class="swatch-row" data-kid="sophie"></div>
+              <div class="emoji-row" data-kid="sophie"></div>
+            </div>
+          </div>
+
           <div class="settings-section-title">Calendar sync</div>
           <div class="settings-row settings-row-stacked">
             <div class="settings-label">
@@ -1077,6 +1140,8 @@ const COLOR_PALETTE = {
   blue:   { label:'Blue',   color:'var(--c-sophie)', ink:'var(--c-sophie-ink)' },
 };
 
+const EMOJI_OPTIONS = ['🎀','🦄','🐱','⚽','🎨','🌈','📚','🎵','🐶','⭐'];
+
 const SETTINGS_STORAGE_KEY = 'family-dashboard-settings-v1';
 
 // These are only the very first-run defaults. Once Settings has been opened
@@ -1097,6 +1162,10 @@ const DEFAULT_SETTINGS = {
     dad:    { name: 'Jonny',     colorKey: 'coral' },
     mum:    { name: 'Catherine', colorKey: 'teal' },
     shared: { name: 'Shared',    colorKey: 'amber' },
+  },
+  kids: {
+    charlotte: { name: 'Charlotte', colorKey: 'purple', emoji: '🎀' },
+    sophie:    { name: 'Sophie',    colorKey: 'blue',   emoji: '🦄' },
   }
 };
 
@@ -1111,6 +1180,10 @@ function loadSettings(){
         dad:    { ...DEFAULT_SETTINGS.people.dad,    ...(parsed.people && parsed.people.dad) },
         mum:    { ...DEFAULT_SETTINGS.people.mum,    ...(parsed.people && parsed.people.mum) },
         shared: { ...DEFAULT_SETTINGS.people.shared, ...(parsed.people && parsed.people.shared) },
+      },
+      kids: {
+        charlotte: { ...DEFAULT_SETTINGS.kids.charlotte, ...(parsed.kids && parsed.kids.charlotte) },
+        sophie:    { ...DEFAULT_SETTINGS.kids.sophie,    ...(parsed.kids && parsed.kids.sophie) },
       }
     };
   } catch(e){
@@ -1725,7 +1798,22 @@ document.getElementById('listInput').addEventListener('keydown', (e) => {
 
 // ---------- chores (Charlotte / Sophie) ----------
 const CHORES_STORAGE_KEY = 'family-chores-v1';
-const CHORE_COLORS = { charlotte: 'var(--c-kids)', sophie: 'var(--c-sophie)' };
+
+function choreColor(child){
+  const cfg = appSettings.kids[child];
+  const pal = COLOR_PALETTE[cfg.colorKey] || COLOR_PALETTE.purple;
+  return pal.color;
+}
+
+function renderChoreHeaders(){
+  ['charlotte','sophie'].forEach(child => {
+    const cfg = appSettings.kids[child];
+    const pal = COLOR_PALETTE[cfg.colorKey] || COLOR_PALETTE.purple;
+    const header = document.getElementById('choreHeader' + child.charAt(0).toUpperCase() + child.slice(1));
+    header.textContent = (cfg.emoji ? cfg.emoji + ' ' : '') + cfg.name;
+    header.style.background = pal.color;
+  });
+}
 
 function loadChores(){
   try{
@@ -1743,6 +1831,7 @@ function saveChores(){
 let chores = loadChores();
 
 function renderChores(){
+  renderChoreHeaders();
   ['charlotte','sophie'].forEach(child => {
     const container = document.querySelector('.chore-items[data-items-for="'+child+'"]');
     container.innerHTML = '';
@@ -1753,6 +1842,7 @@ function renderChores(){
       return;
     }
 
+    const color = choreColor(child);
     const sorted = [...list].sort((a,b) => (a.done === b.done) ? 0 : (a.done ? 1 : -1));
     sorted.forEach(item => {
       const row = document.createElement('div');
@@ -1760,8 +1850,8 @@ function renderChores(){
 
       const box = document.createElement('div');
       box.className = 'chore-checkbox';
-      box.style.background = item.done ? CHORE_COLORS[child] : 'transparent';
-      box.style.borderColor = item.done ? CHORE_COLORS[child] : '';
+      box.style.background = item.done ? color : 'transparent';
+      box.style.borderColor = item.done ? color : '';
       box.textContent = item.done ? '😊' : '';
       box.addEventListener('click', () => toggleChoreItem(child, item.id));
 
@@ -1925,6 +2015,41 @@ function renderPersonSwatches(personKey){
   });
 }
 
+function renderKidSwatches(kidKey){
+  const row = document.querySelector('.swatch-row[data-kid="'+kidKey+'"]');
+  row.innerHTML = '';
+  Object.entries(COLOR_PALETTE).forEach(([key, pal]) => {
+    const dot = document.createElement('div');
+    dot.className = 'swatch' + (appSettings.kids[kidKey].colorKey === key ? ' selected' : '');
+    dot.style.background = pal.color;
+    dot.title = pal.label;
+    dot.addEventListener('click', () => {
+      appSettings.kids[kidKey].colorKey = key;
+      saveSettings();
+      renderSettingsView();
+      renderChores();
+    });
+    row.appendChild(dot);
+  });
+}
+
+function renderKidEmojiPicker(kidKey){
+  const row = document.querySelector('.emoji-row[data-kid="'+kidKey+'"]');
+  row.innerHTML = '';
+  EMOJI_OPTIONS.forEach(emoji => {
+    const btn = document.createElement('div');
+    btn.className = 'emoji-option' + (appSettings.kids[kidKey].emoji === emoji ? ' selected' : '');
+    btn.textContent = emoji;
+    btn.addEventListener('click', () => {
+      appSettings.kids[kidKey].emoji = emoji;
+      saveSettings();
+      renderSettingsView();
+      renderChores();
+    });
+    row.appendChild(btn);
+  });
+}
+
 function renderSettingsView(){
   // Night dimming
   document.getElementById('nightToggle').classList.toggle('on', appSettings.nightDimEnabled);
@@ -1941,6 +2066,13 @@ function renderSettingsView(){
   ['dad','mum','shared'].forEach(key => {
     document.querySelector('.person-name-input[data-person="'+key+'"]').value = appSettings.people[key].name;
     renderPersonSwatches(key);
+  });
+
+  // Kids — names, colours, and emoji
+  ['charlotte','sophie'].forEach(key => {
+    document.querySelector('.kid-name-input[data-kid="'+key+'"]').value = appSettings.kids[key].name;
+    renderKidSwatches(key);
+    renderKidEmojiPicker(key);
   });
 
   // Calendar feed
@@ -1999,6 +2131,16 @@ document.querySelectorAll('.person-name-input').forEach(input => {
     renderSettingsView();
     renderWeek();
     renderMonth();
+  });
+});
+
+document.querySelectorAll('.kid-name-input').forEach(input => {
+  const key = input.dataset.kid;
+  input.addEventListener('change', () => {
+    appSettings.kids[key].name = input.value;
+    saveSettings();
+    renderSettingsView();
+    renderChores();
   });
 });
 
@@ -2067,6 +2209,7 @@ document.getElementById('resetSettingsBtn').addEventListener('click', () => {
   renderSettingsView();
   renderWeek();
   renderMonth();
+  renderChores();
   updateNightMode();
   tickClock();
   loadWeather();
