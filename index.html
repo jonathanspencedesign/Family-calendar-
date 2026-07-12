@@ -539,6 +539,210 @@
     padding:30px 0;
   }
 
+  /* ---------- countdown chip ---------- */
+  .countdown-chip{
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-mid);
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:6px 12px;
+    white-space:nowrap;
+  }
+
+  /* ---------- bin day banner ---------- */
+  .bin-banner{
+    background:var(--c-shared);
+    color:var(--c-shared-ink);
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    text-align:center;
+    padding:9px 0;
+    border-radius:10px;
+    margin-bottom:10px;
+  }
+
+  /* ---------- night dimming ---------- */
+  #nightOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(12,9,6,0.55);
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 4s ease;
+    z-index:40;
+  }
+  #nightOverlay.active{ opacity:1; }
+
+  /* ---------- settings view ---------- */
+  .settings-panel{
+    max-width:560px;
+  }
+  .settings-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 18px;
+    margin-bottom:12px;
+  }
+  .settings-label{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .settings-title{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:15px;
+  }
+  .settings-sub{
+    font-size:12.5px;
+    color:var(--ink-mid);
+    max-width:340px;
+  }
+  .settings-time-controls{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-shrink:0;
+  }
+  .settings-time-controls select{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    color:var(--ink);
+  }
+
+  .toggle-switch{
+    width:46px; height:26px;
+    border-radius:13px;
+    background:var(--line);
+    position:relative;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:background 0.2s ease;
+  }
+  .toggle-switch.on{ background:var(--c-mum); }
+  .toggle-knob{
+    position:absolute;
+    top:3px; left:3px;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,0.2);
+    transition:left 0.2s ease;
+  }
+  .toggle-switch.on .toggle-knob{ left:23px; }
+  .settings-row.disabled{ opacity:0.45; pointer-events:none; }
+
+  .settings-scroll{
+    flex:1;
+    overflow-y:auto;
+    min-height:0;
+    -webkit-overflow-scrolling:touch;
+  }
+  .settings-scroll::-webkit-scrollbar{ width:5px; }
+  .settings-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+
+  .settings-section-title{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    letter-spacing:1.5px;
+    color:var(--ink-mid);
+    text-transform:uppercase;
+    margin:22px 0 10px;
+  }
+  .settings-section-title:first-child{ margin-top:2px; }
+
+  .settings-row-stacked{
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+  }
+
+  .settings-inline-form{
+    display:flex;
+    gap:8px;
+  }
+  .settings-inline-form input{
+    flex:1;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    -webkit-user-select:text;
+    user-select:text;
+  }
+  .settings-inline-form button{
+    padding:0 18px;
+    border-radius:10px;
+    border:none;
+    background:var(--ink);
+    color:#fff;
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+
+  .settings-person-controls{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:8px;
+  }
+  .person-name-input{
+    padding:8px 12px;
+    border-radius:9px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    text-align:right;
+    width:150px;
+    -webkit-user-select:text;
+    user-select:text;
+  }
+  .swatch-row{ display:flex; gap:6px; }
+  .swatch{
+    width:22px; height:22px;
+    border-radius:50%;
+    cursor:pointer;
+    border:2px solid transparent;
+  }
+  .swatch.selected{ border-color:var(--ink); }
+
+  .settings-action-btn{
+    padding:9px 20px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--ink);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .settings-action-btn.danger{ color:#B23B2E; border-color:#EFC9C2; }
+  .settings-action-btn:active{ opacity:0.8; }
+
   .event-block, .mevent{ cursor:pointer; }
 
   /* ---------- tap-to-expand popup ---------- */
@@ -639,7 +843,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V3Z"/><path d="m8.5 12 1.5 1.5L13 10.5"/><path d="m8.5 17 1.5 1.5L13 15.5"/></svg>
     </div>
     <div class="rail-spacer"></div>
-    <div class="rail-btn" title="Settings">
+    <div class="rail-btn" id="railSettings" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </div>
   </aside>
@@ -652,6 +856,7 @@
         <div class="brand-weather" id="weatherBtn">
           <span id="weatherIcon">⛅</span><span id="weatherTemp">--°</span>
         </div>
+        <div class="countdown-chip" id="countdownChip" hidden></div>
       </div>
       <div class="topbar-right">
         <div class="view-toggle" id="viewToggle">
@@ -662,6 +867,8 @@
         </div>
       </div>
     </div>
+
+    <div class="bin-banner" id="binBanner" hidden></div>
 
     <div class="people-row" id="peopleRow"></div>
 
@@ -678,9 +885,7 @@
         <div class="month-nav-label" id="monthNavLabel">Month Year</div>
         <button class="month-nav-btn" id="monthNext" aria-label="Next month">›</button>
       </div>
-      <div class="month-weekdays">
-        <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
-      </div>
+      <div class="month-weekdays" id="monthWeekdays"></div>
       <div class="month-scroll" id="monthScroll">
         <div class="month-grid" id="monthGrid"></div>
       </div>
@@ -714,6 +919,143 @@
         </div>
       </div>
     </div>
+
+    <div class="view" id="settingsView" hidden>
+      <div class="settings-scroll" id="settingsScroll">
+        <div class="settings-panel">
+
+          <div class="settings-section-title">Display</div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Night dimming</div>
+              <div class="settings-sub">Gently dims the display overnight, easier on the eyes on a wall-mounted screen</div>
+            </div>
+            <div class="toggle-switch" id="nightToggle"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="settings-row" id="nightTimesRow">
+            <div class="settings-label">
+              <div class="settings-title">Dim between</div>
+              <div class="settings-sub">Display dims from the start time until the end time each day</div>
+            </div>
+            <div class="settings-time-controls">
+              <select id="nightStartSelect"></select>
+              <span>–</span>
+              <select id="nightEndSelect"></select>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">24-hour clock</div>
+              <div class="settings-sub">Show the header clock as 24-hour (14:05) instead of 12-hour (2:05 PM)</div>
+            </div>
+            <div class="toggle-switch" id="clockFormatToggle"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Week starts on Monday</div>
+              <div class="settings-sub">Turn off to start the week on Sunday instead</div>
+            </div>
+            <div class="toggle-switch" id="weekStartToggle"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Week view opens at</div>
+              <div class="settings-sub">The time of day the Week view scrolls to by default</div>
+            </div>
+            <div class="settings-time-controls">
+              <select id="weekScrollSelect"></select>
+            </div>
+          </div>
+
+          <div class="settings-section-title">People</div>
+          <div class="settings-row settings-person-row" data-person="dad">
+            <div class="settings-label">
+              <div class="settings-title">Dad</div>
+              <div class="settings-sub">Name and colour shown on events, chores, and the calendar</div>
+            </div>
+            <div class="settings-person-controls">
+              <input type="text" class="person-name-input" data-person="dad">
+              <div class="swatch-row" data-person="dad"></div>
+            </div>
+          </div>
+          <div class="settings-row settings-person-row" data-person="mum">
+            <div class="settings-label">
+              <div class="settings-title">Mum</div>
+              <div class="settings-sub">Name and colour shown on events, chores, and the calendar</div>
+            </div>
+            <div class="settings-person-controls">
+              <input type="text" class="person-name-input" data-person="mum">
+              <div class="swatch-row" data-person="mum"></div>
+            </div>
+          </div>
+          <div class="settings-row settings-person-row" data-person="shared">
+            <div class="settings-label">
+              <div class="settings-title">Shared</div>
+              <div class="settings-sub">Name and colour for family/shared events</div>
+            </div>
+            <div class="settings-person-controls">
+              <input type="text" class="person-name-input" data-person="shared">
+              <div class="swatch-row" data-person="shared"></div>
+            </div>
+          </div>
+
+          <div class="settings-section-title">Calendar sync</div>
+          <div class="settings-row settings-row-stacked">
+            <div class="settings-label">
+              <div class="settings-title">Calendar feed URL</div>
+              <div class="settings-sub">The Cloudflare Worker URL that merges your Google Calendar feeds</div>
+            </div>
+            <div class="settings-inline-form">
+              <input type="text" id="feedUrlInput" placeholder="https://your-worker.workers.dev" autocomplete="off">
+              <button id="feedUrlSaveBtn">Save</button>
+            </div>
+          </div>
+
+          <div class="settings-section-title">Weather</div>
+          <div class="settings-row settings-row-stacked">
+            <div class="settings-label">
+              <div class="settings-title">Location</div>
+              <div class="settings-sub" id="locationCurrentSub">—</div>
+            </div>
+            <div class="settings-inline-form">
+              <input type="text" id="locationInput" placeholder="e.g. Newtownabbey" autocomplete="off">
+              <button id="locationSaveBtn">Search &amp; save</button>
+            </div>
+          </div>
+
+          <div class="settings-section-title">Data</div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Refresh now</div>
+              <div class="settings-sub">Force an immediate calendar and weather refresh</div>
+            </div>
+            <button class="settings-action-btn" id="refreshNowBtn">Refresh</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Clear shopping list</div>
+              <div class="settings-sub">Removes every item, ticked or not</div>
+            </div>
+            <button class="settings-action-btn danger" id="clearShoppingBtn">Clear</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Clear chores</div>
+              <div class="settings-sub">Removes every chore for both Charlotte and Sophie</div>
+            </div>
+            <button class="settings-action-btn danger" id="clearChoresBtn">Clear</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Reset all settings</div>
+              <div class="settings-sub">Puts every setting on this page back to its default</div>
+            </div>
+            <button class="settings-action-btn danger" id="resetSettingsBtn">Reset</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -721,19 +1063,84 @@
   <div class="popup-card" id="popupCard"></div>
 </div>
 
+<div id="nightOverlay"></div>
+
 <script>
-const PEOPLE = {
-  dad:    { name:'Jonny',    color:'var(--c-dad)',    ink:'var(--c-dad-ink)',    initial:'J' },
-  mum:    { name:'Catherine',color:'var(--c-mum)',    ink:'var(--c-mum-ink)',    initial:'C' },
-  shared: { name:'Shared',   color:'var(--c-shared)', ink:'var(--c-shared-ink)', initial:'S' },
+// ============================================================
+// Settings — persisted locally on this tablet (localStorage)
+// ============================================================
+const COLOR_PALETTE = {
+  coral:  { label:'Coral',  color:'var(--c-dad)',    ink:'var(--c-dad-ink)' },
+  teal:   { label:'Teal',   color:'var(--c-mum)',    ink:'var(--c-mum-ink)' },
+  amber:  { label:'Amber',  color:'var(--c-shared)', ink:'var(--c-shared-ink)' },
+  purple: { label:'Purple', color:'var(--c-kids)',   ink:'var(--c-kids-ink)' },
+  blue:   { label:'Blue',   color:'var(--c-sophie)', ink:'var(--c-sophie-ink)' },
 };
 
-// URL of the Cloudflare Worker that merges the Google Calendar feeds.
-// Leave blank to keep showing demo/placeholder events.
-const CALENDAR_FEED_URL = 'https://family-calendar.jonathanspencedesign.workers.dev/';
+const SETTINGS_STORAGE_KEY = 'family-dashboard-settings-v1';
 
-// Set to the tablet's actual location. Defaults to Newtownabbey.
-const LOCATION = { name:'Newtownabbey', lat:54.6779, lon:-5.9249 };
+// These are only the very first-run defaults. Once Settings has been opened
+// and anything saved, everything below lives in this tablet's local storage —
+// editing these constants afterwards won't change what's already saved.
+const DEFAULT_SETTINGS = {
+  nightDimEnabled: true,
+  nightStartHour: 22,
+  nightEndHour: 7,
+  clockFormat24h: true,
+  weekStartsMonday: true,
+  weekScrollHour: 7,
+  calendarFeedUrl: 'https://family-calendar.jonathanspencedesign.workers.dev/',
+  locationName: 'Newtownabbey',
+  locationLat: 54.6779,
+  locationLon: -5.9249,
+  people: {
+    dad:    { name: 'Jonny',     colorKey: 'coral' },
+    mum:    { name: 'Catherine', colorKey: 'teal' },
+    shared: { name: 'Shared',    colorKey: 'amber' },
+  }
+};
+
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+      people: {
+        dad:    { ...DEFAULT_SETTINGS.people.dad,    ...(parsed.people && parsed.people.dad) },
+        mum:    { ...DEFAULT_SETTINGS.people.mum,    ...(parsed.people && parsed.people.mum) },
+        shared: { ...DEFAULT_SETTINGS.people.shared, ...(parsed.people && parsed.people.shared) },
+      }
+    };
+  } catch(e){
+    return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  }
+}
+
+function saveSettings(){
+  try{ localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(appSettings)); } catch(e){}
+}
+
+let appSettings = loadSettings();
+
+function buildPeople(){
+  const P = {};
+  ['dad','mum','shared'].forEach(key => {
+    const cfg = appSettings.people[key];
+    const pal = COLOR_PALETTE[cfg.colorKey] || COLOR_PALETTE.coral;
+    const trimmedName = (cfg.name || '').trim() || key;
+    P[key] = {
+      name: trimmedName,
+      color: pal.color,
+      ink: pal.ink,
+      initial: trimmedName.charAt(0).toUpperCase()
+    };
+  });
+  return P;
+}
+
+let PEOPLE = buildPeople();
 
 const WEATHER_ICONS = {
   0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
@@ -750,7 +1157,6 @@ const HOUR_START = 0;
 const HOUR_END = 24;
 const HOURS = HOUR_END - HOUR_START;
 const ROW_HEIGHT = 64; // px per hour in the week view — taller rows, day is scrollable
-const DEFAULT_SCROLL_HOUR = 7; // where the week view opens by default (still scrollable to see all 24h)
 
 // ---------- seeded rng so layout is stable across renders ----------
 let seed = 11;
@@ -759,9 +1165,9 @@ function rand(){ seed = (seed*9301+49297)%233280; return seed/233280; }
 let LIVE_EVENTS = null; // populated once the Worker feed loads successfully
 
 async function loadCalendarData(){
-  if(!CALENDAR_FEED_URL) return; // no feed configured yet — stay in demo mode
+  if(!appSettings.calendarFeedUrl) return; // no feed configured yet — stay in demo mode
   try{
-    const res = await fetch(CALENDAR_FEED_URL);
+    const res = await fetch(appSettings.calendarFeedUrl);
     if(!res.ok) throw new Error('feed returned ' + res.status);
     const data = await res.json();
     LIVE_EVENTS = data.events.map(e => ({
@@ -864,9 +1270,9 @@ function fmtTime(h){
   return h12 + (min ? ':' + String(min).padStart(2,'0') : '') + period;
 }
 
-function getMonday(d){
+function getWeekStart(d){
   const date = new Date(d);
-  const day = (date.getDay()+6)%7;
+  const day = appSettings.weekStartsMonday ? (date.getDay()+6)%7 : date.getDay();
   date.setDate(date.getDate()-day);
   date.setHours(0,0,0,0);
   return date;
@@ -903,8 +1309,8 @@ function updatePeopleRow(){
 }
 
 function renderWeek(){
-  const monday = getMonday(new Date());
-  const weekDates = [...Array(7)].map((_,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return d; });
+  const weekStart = getWeekStart(new Date());
+  const weekDates = [...Array(7)].map((_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
   const todayStr = new Date().toDateString();
 
   const events = buildWeekEvents(weekDates);
@@ -975,7 +1381,7 @@ function renderWeek(){
   // Open the view scrolled to a sensible default (e.g. 7am) rather than midnight,
   // but the whole 24h day remains reachable by scrolling up/down.
   if(scrollWrap.dataset.scrolled !== 'true'){
-    scrollWrap.scrollTop = DEFAULT_SCROLL_HOUR * ROW_HEIGHT;
+    scrollWrap.scrollTop = appSettings.weekScrollHour * ROW_HEIGHT;
     scrollWrap.dataset.scrolled = 'true';
   }
 }
@@ -1033,8 +1439,13 @@ function renderMonth(){
   document.getElementById('monthNavLabel').textContent =
     target.toLocaleDateString('en-GB', { month:'long', year:'numeric' });
 
+  const weekdayLabels = appSettings.weekStartsMonday
+    ? ['MON','TUE','WED','THU','FRI','SAT','SUN']
+    : ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  document.getElementById('monthWeekdays').innerHTML = weekdayLabels.map(d => '<div>'+d+'</div>').join('');
+
   const firstOfMonth = new Date(year, month, 1);
-  const startOffset = (firstOfMonth.getDay()+6)%7;
+  const startOffset = appSettings.weekStartsMonday ? (firstOfMonth.getDay()+6)%7 : firstOfMonth.getDay();
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const daysInPrevMonth = new Date(year, month, 0).getDate();
   const totalCells = Math.ceil((startOffset+daysInMonth)/7)*7;
@@ -1132,7 +1543,7 @@ function showDayList(dayLabel, list){
 let forecastCache = null;
 
 async function fetchWeather(){
-  const url = 'https://api.open-meteo.com/v1/forecast?latitude='+LOCATION.lat+'&longitude='+LOCATION.lon+
+  const url = 'https://api.open-meteo.com/v1/forecast?latitude='+appSettings.locationLat+'&longitude='+appSettings.locationLon+
     '&daily=weathercode,temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&forecast_days=10';
   const res = await fetch(url);
   if(!res.ok) throw new Error('weather fetch failed');
@@ -1173,7 +1584,7 @@ function showForecast(){
   }).join('');
   popupCard.classList.add('wide');
   showPopup(
-    '<div class="popup-title">'+LOCATION.name+' — 10 day forecast</div>'+
+    '<div class="popup-title">'+appSettings.locationName+' — 10 day forecast</div>'+
     '<div class="forecast-row">'+cards+'</div>'+
     '<div class="popup-hint">Tap anywhere to close</div>'
   );
@@ -1193,6 +1604,7 @@ function setView(view){
   document.getElementById('monthView').hidden = view !== 'month';
   document.getElementById('listView').hidden = view !== 'list';
   document.getElementById('choresView').hidden = view !== 'chores';
+  document.getElementById('settingsView').hidden = view !== 'settings';
   document.getElementById('toggleWeek').classList.toggle('active', view==='week');
   document.getElementById('toggleMonth').classList.toggle('active', view==='month');
   document.getElementById('toggleList').classList.toggle('active', view==='list');
@@ -1201,9 +1613,11 @@ function setView(view){
   document.getElementById('railMonth').classList.toggle('active', view==='month');
   document.getElementById('railList').classList.toggle('active', view==='list');
   document.getElementById('railChores').classList.toggle('active', view==='chores');
-  document.getElementById('peopleRow').style.display = (view==='list' || view==='chores') ? 'none' : 'flex';
+  document.getElementById('railSettings').classList.toggle('active', view==='settings');
+  document.getElementById('peopleRow').style.display = (view==='list' || view==='chores' || view==='settings') ? 'none' : 'flex';
   if(view === 'list') renderShoppingList();
   if(view === 'chores') renderChores();
+  if(view === 'settings') renderSettingsView();
   updatePeopleRow();
 }
 
@@ -1215,6 +1629,7 @@ document.getElementById('railWeek').onclick = ()=>setView('week');
 document.getElementById('railMonth').onclick = ()=>setView('month');
 document.getElementById('railList').onclick = ()=>setView('list');
 document.getElementById('railChores').onclick = ()=>setView('chores');
+document.getElementById('railSettings').onclick = ()=>setView('settings');
 document.getElementById('monthPrev').onclick = ()=>{ monthOffset--; renderMonth(); };
 document.getElementById('monthNext').onclick = ()=>{ monthOffset++; renderMonth(); };
 
@@ -1432,16 +1847,254 @@ document.getElementById('btnToday').onclick = ()=>{
 
 function tickClock(){
   document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12: !appSettings.clockFormat24h });
+}
+
+// ---------- bin day banner ----------
+// Heuristic: looks for any event today whose title mentions "bin" (case-insensitive).
+function checkBinDay(){
+  const banner = document.getElementById('binBanner');
+  if(!LIVE_EVENTS){ banner.hidden = true; return; }
+  const now = new Date();
+  const dayStart = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const dayEnd = dayStart + 86400000;
+  const match = LIVE_EVENTS.find(ev =>
+    ev.start.getTime() < dayEnd && ev.end.getTime() > dayStart && /\bbin/i.test(ev.title)
+  );
+  if(match){
+    banner.hidden = false;
+    banner.textContent = '🗑️ ' + match.title + ' — today';
+  } else {
+    banner.hidden = true;
+  }
+}
+
+// ---------- countdown chip ----------
+// Heuristic: the next upcoming all-day event (holidays, birthdays, term dates, etc.)
+function updateCountdownChip(){
+  const chip = document.getElementById('countdownChip');
+  if(!LIVE_EVENTS){ chip.hidden = true; return; }
+  const now = new Date();
+  const todayStart = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const upcoming = LIVE_EVENTS
+    .filter(ev => ev.allDay && ev.start.getTime() >= todayStart)
+    .sort((a,b) => a.start - b.start)[0];
+  if(!upcoming){ chip.hidden = true; return; }
+  const days = Math.round((upcoming.start.getTime() - todayStart) / 86400000);
+  chip.hidden = false;
+  chip.textContent = days === 0
+    ? ('🎉 ' + upcoming.title + ' — today!')
+    : ('🎉 ' + days + ' day' + (days === 1 ? '' : 's') + ' to ' + upcoming.title);
+}
+
+// ---------- Settings view: rendering + all control wiring ----------
+function formatHourLabel(h){
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = ((h + 11) % 12) + 1;
+  return h12 + ':00 ' + period;
+}
+
+function populateHourSelect(select, selectedHour){
+  select.innerHTML = '';
+  for(let h = 0; h < 24; h++){
+    const opt = document.createElement('option');
+    opt.value = h;
+    opt.textContent = formatHourLabel(h);
+    if(h === selectedHour) opt.selected = true;
+    select.appendChild(opt);
+  }
+}
+
+function renderPersonSwatches(personKey){
+  const row = document.querySelector('.swatch-row[data-person="'+personKey+'"]');
+  row.innerHTML = '';
+  Object.entries(COLOR_PALETTE).forEach(([key, pal]) => {
+    const dot = document.createElement('div');
+    dot.className = 'swatch' + (appSettings.people[personKey].colorKey === key ? ' selected' : '');
+    dot.style.background = pal.color;
+    dot.title = pal.label;
+    dot.addEventListener('click', () => {
+      appSettings.people[personKey].colorKey = key;
+      saveSettings();
+      PEOPLE = buildPeople();
+      renderSettingsView();
+      renderWeek();
+      renderMonth();
+    });
+    row.appendChild(dot);
+  });
+}
+
+function renderSettingsView(){
+  // Night dimming
+  document.getElementById('nightToggle').classList.toggle('on', appSettings.nightDimEnabled);
+  document.getElementById('nightTimesRow').classList.toggle('disabled', !appSettings.nightDimEnabled);
+  populateHourSelect(document.getElementById('nightStartSelect'), appSettings.nightStartHour);
+  populateHourSelect(document.getElementById('nightEndSelect'), appSettings.nightEndHour);
+
+  // Clock format / week start / week scroll hour
+  document.getElementById('clockFormatToggle').classList.toggle('on', appSettings.clockFormat24h);
+  document.getElementById('weekStartToggle').classList.toggle('on', appSettings.weekStartsMonday);
+  populateHourSelect(document.getElementById('weekScrollSelect'), appSettings.weekScrollHour);
+
+  // People — names and colours
+  ['dad','mum','shared'].forEach(key => {
+    document.querySelector('.person-name-input[data-person="'+key+'"]').value = appSettings.people[key].name;
+    renderPersonSwatches(key);
+  });
+
+  // Calendar feed
+  document.getElementById('feedUrlInput').value = appSettings.calendarFeedUrl;
+
+  // Weather location
+  document.getElementById('locationInput').value = appSettings.locationName;
+  document.getElementById('locationCurrentSub').textContent =
+    'Currently: ' + appSettings.locationName + ' (' + appSettings.locationLat.toFixed(2) + ', ' + appSettings.locationLon.toFixed(2) + ')';
+}
+
+document.getElementById('nightToggle').addEventListener('click', () => {
+  appSettings.nightDimEnabled = !appSettings.nightDimEnabled;
+  saveSettings();
+  renderSettingsView();
+  updateNightMode();
+});
+document.getElementById('nightStartSelect').addEventListener('change', (e) => {
+  appSettings.nightStartHour = parseInt(e.target.value, 10);
+  saveSettings();
+  updateNightMode();
+});
+document.getElementById('nightEndSelect').addEventListener('change', (e) => {
+  appSettings.nightEndHour = parseInt(e.target.value, 10);
+  saveSettings();
+  updateNightMode();
+});
+
+document.getElementById('clockFormatToggle').addEventListener('click', () => {
+  appSettings.clockFormat24h = !appSettings.clockFormat24h;
+  saveSettings();
+  renderSettingsView();
+  tickClock();
+});
+document.getElementById('weekStartToggle').addEventListener('click', () => {
+  appSettings.weekStartsMonday = !appSettings.weekStartsMonday;
+  saveSettings();
+  renderSettingsView();
+  renderWeek();
+  renderMonth();
+});
+document.getElementById('weekScrollSelect').addEventListener('change', (e) => {
+  appSettings.weekScrollHour = parseInt(e.target.value, 10);
+  saveSettings();
+  const sw = document.getElementById('weekScroll');
+  if(sw) sw.dataset.scrolled = 'false'; // so the new default takes effect on next render
+  renderWeek();
+});
+
+document.querySelectorAll('.person-name-input').forEach(input => {
+  const key = input.dataset.person;
+  input.addEventListener('change', () => {
+    appSettings.people[key].name = input.value;
+    saveSettings();
+    PEOPLE = buildPeople();
+    renderSettingsView();
+    renderWeek();
+    renderMonth();
+  });
+});
+
+document.getElementById('feedUrlSaveBtn').addEventListener('click', () => {
+  appSettings.calendarFeedUrl = document.getElementById('feedUrlInput').value.trim();
+  saveSettings();
+  refreshAll();
+});
+
+async function geocodeLocation(query){
+  const url = 'https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(query) + '&count=1';
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('geocoding request failed');
+  const data = await res.json();
+  if(!data.results || !data.results.length) throw new Error('no match found');
+  const r = data.results[0];
+  return { name: r.name, lat: r.latitude, lon: r.longitude };
+}
+
+document.getElementById('locationSaveBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('locationSaveBtn');
+  const query = document.getElementById('locationInput').value.trim();
+  if(!query) return;
+  const original = btn.textContent;
+  btn.textContent = 'Searching…';
+  try{
+    const loc = await geocodeLocation(query);
+    appSettings.locationName = loc.name;
+    appSettings.locationLat = loc.lat;
+    appSettings.locationLon = loc.lon;
+    saveSettings();
+    renderSettingsView();
+    await loadWeather();
+  } catch(e){
+    document.getElementById('locationCurrentSub').textContent = 'Could not find that location — try a different spelling.';
+  } finally {
+    btn.textContent = original;
+  }
+});
+
+document.getElementById('refreshNowBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('refreshNowBtn');
+  const original = btn.textContent;
+  btn.textContent = 'Refreshing…';
+  await refreshAll();
+  await loadWeather();
+  btn.textContent = original;
+});
+
+document.getElementById('clearShoppingBtn').addEventListener('click', () => {
+  shoppingList = [];
+  saveShoppingList();
+  renderShoppingList();
+});
+
+document.getElementById('clearChoresBtn').addEventListener('click', () => {
+  chores = { charlotte: [], sophie: [] };
+  saveChores();
+  renderChores();
+});
+
+document.getElementById('resetSettingsBtn').addEventListener('click', () => {
+  appSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  saveSettings();
+  PEOPLE = buildPeople();
+  renderSettingsView();
+  renderWeek();
+  renderMonth();
+  updateNightMode();
+  tickClock();
+  loadWeather();
+});
+
+function updateNightMode(){
+  if(!appSettings.nightDimEnabled){
+    document.getElementById('nightOverlay').classList.remove('active');
+    return;
+  }
+  const h = new Date().getHours();
+  const start = appSettings.nightStartHour, end = appSettings.nightEndHour;
+  // Handles the overnight wrap (e.g. 22 -> 7) as well as a same-day range (e.g. 13 -> 18).
+  const isNight = start > end ? (h >= start || h < end) : (h >= start && h < end);
+  document.getElementById('nightOverlay').classList.toggle('active', isNight);
 }
 
 async function refreshAll(){
   await loadCalendarData();
   renderWeek();
   renderMonth();
+  checkBinDay();
+  updateCountdownChip();
 }
 
 refreshAll();
+updateNightMode();
+setInterval(updateNightMode, 60 * 1000);
 tickClock();
 setInterval(tickClock, 1000);
 setInterval(refreshAll, 10*60*1000);
