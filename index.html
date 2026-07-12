@@ -26,6 +26,16 @@
     --c-sophie-ink: #24587F;
     --c-shared: #F6C77C;
     --c-shared-ink: #8A5A12;
+    --c-green: #93CE8E;
+    --c-green-ink: #2E6B2A;
+    --c-pink: #F2A8C4;
+    --c-pink-ink: #9C3F66;
+    --c-yellow: #F0D878;
+    --c-yellow-ink: #8A6A12;
+    --c-indigo: #A6AEDD;
+    --c-indigo-ink: #3F4A94;
+    --c-rose: #E8938C;
+    --c-rose-ink: #8A2E23;
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
@@ -719,7 +729,7 @@
     -webkit-user-select:text;
     user-select:text;
   }
-  .swatch-row{ display:flex; gap:6px; }
+  .swatch-row{ display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; max-width:210px; }
   .swatch{
     width:22px; height:22px;
     border-radius:50%;
@@ -1138,6 +1148,11 @@ const COLOR_PALETTE = {
   amber:  { label:'Amber',  color:'var(--c-shared)', ink:'var(--c-shared-ink)' },
   purple: { label:'Purple', color:'var(--c-kids)',   ink:'var(--c-kids-ink)' },
   blue:   { label:'Blue',   color:'var(--c-sophie)', ink:'var(--c-sophie-ink)' },
+  green:  { label:'Green',  color:'var(--c-green)',  ink:'var(--c-green-ink)' },
+  pink:   { label:'Pink',   color:'var(--c-pink)',   ink:'var(--c-pink-ink)' },
+  yellow: { label:'Yellow', color:'var(--c-yellow)', ink:'var(--c-yellow-ink)' },
+  indigo: { label:'Indigo', color:'var(--c-indigo)', ink:'var(--c-indigo-ink)' },
+  rose:   { label:'Rose',   color:'var(--c-rose)',   ink:'var(--c-rose-ink)' },
 };
 
 const EMOJI_OPTIONS = [
