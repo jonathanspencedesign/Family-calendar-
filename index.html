@@ -289,18 +289,17 @@
   }
   .month-scroll{
     flex:1;
-    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
     min-height:0;
-    -webkit-overflow-scrolling:touch;
   }
-  .month-scroll::-webkit-scrollbar{ width:5px; }
-  .month-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
 
   .month-grid{
+    flex:1;
     display:grid;
     grid-template-columns:repeat(7,1fr);
-    grid-auto-rows:130px;
     gap:6px;
+    min-height:0;
   }
   .mcell{
     background:var(--panel);
@@ -494,7 +493,7 @@ const PEOPLE = {
 
 // URL of the Cloudflare Worker that merges the Google Calendar feeds.
 // Leave blank to keep showing demo/placeholder events.
-const CALENDAR_FEED_URL = 'https://family-calendar.jonathanspencedesign.workers.dev/';
+const CALENDAR_FEED_URL = '';
 
 // Set to the tablet's actual location. Defaults to Newtownabbey.
 const LOCATION = { name:'Newtownabbey', lat:54.6779, lon:-5.9249 };
@@ -545,8 +544,9 @@ function dateKey(y,m,d){ return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).
 
 function eventsOnDate(y, m, d){
   if(!LIVE_EVENTS) return null;
-  const key = dateKey(y,m,d);
-  return LIVE_EVENTS.filter(ev => dateKey(ev.start.getUTCFullYear(), ev.start.getUTCMonth(), ev.start.getUTCDate()) === key);
+  const dayStart = Date.UTC(y, m, d);
+  const dayEnd = dayStart + 86400000; // exclusive, per iCal DTEND convention
+  return LIVE_EVENTS.filter(ev => ev.start.getTime() < dayEnd && ev.end.getTime() > dayStart);
 }
 
 function clampHour(h, minVal){
@@ -558,13 +558,20 @@ function clampHour(h, minVal){
 function buildWeekEvents(weekDates){
   if(LIVE_EVENTS){
     return weekDates.map(d => {
-      const list = eventsOnDate(d.getFullYear(), d.getMonth(), d.getDate()) || [];
+      const y = d.getFullYear(), m = d.getMonth(), dayNum = d.getDate();
+      const list = eventsOnDate(y, m, dayNum) || [];
+      const dayStart = Date.UTC(y, m, dayNum);
+      const dayEnd = dayStart + 86400000;
       return list.map(ev => {
         if(ev.allDay){
           return { person: ev.person, title: ev.title, start: HOUR_START, end: HOUR_START + 0.75 };
         }
-        const start = clampHour(ev.start.getUTCHours() + ev.start.getUTCMinutes()/60);
-        const end = clampHour(ev.end.getUTCHours() + ev.end.getUTCMinutes()/60, start + 0.5);
+        // Clip the event to this specific day's 0–24h window, so a multi-day
+        // event shows a continuing block on every day it spans, not just the first.
+        const clippedStartMs = Math.max(ev.start.getTime(), dayStart);
+        const clippedEndMs = Math.min(ev.end.getTime(), dayEnd);
+        const start = clampHour((clippedStartMs - dayStart) / 3600000);
+        const end = clampHour((clippedEndMs - dayStart) / 3600000, start + 0.5);
         return { person: ev.person, title: ev.title, start, end };
       });
     });
@@ -628,10 +635,14 @@ function getMonday(d){
   return date;
 }
 
-function renderPeopleRow(weekEventsByDay){
+let currentView = 'week';
+let weekEventsFlat = [];
+let monthEventsFlat = [];
+
+function renderPeopleRow(flatEvents){
   const counts = {};
   Object.keys(PEOPLE).forEach(k => counts[k] = 0);
-  weekEventsByDay.forEach(day => day.forEach(ev => { if(counts[ev.person] !== undefined) counts[ev.person]++; }));
+  flatEvents.forEach(ev => { if(counts[ev.person] !== undefined) counts[ev.person]++; });
   const total = Math.max(1, Math.max(...Object.values(counts)));
   const row = document.getElementById('peopleRow');
   row.innerHTML = '';
@@ -650,13 +661,18 @@ function renderPeopleRow(weekEventsByDay){
   });
 }
 
+function updatePeopleRow(){
+  renderPeopleRow(currentView === 'month' ? monthEventsFlat : weekEventsFlat);
+}
+
 function renderWeek(){
   const monday = getMonday(new Date());
   const weekDates = [...Array(7)].map((_,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return d; });
   const todayStr = new Date().toDateString();
 
   const events = buildWeekEvents(weekDates);
-  renderPeopleRow(events);
+  weekEventsFlat = events.flat();
+  updatePeopleRow();
 
   // header
   const header = document.getElementById('weekHeader');
@@ -786,6 +802,8 @@ function renderMonth(){
   const daysInPrevMonth = new Date(year, month, 0).getDate();
   const totalCells = Math.ceil((startOffset+daysInMonth)/7)*7;
   const events = buildMonthEvents(daysInMonth, year, month);
+  monthEventsFlat = Object.values(events).flat();
+  updatePeopleRow();
 
   const grid = document.getElementById('monthGrid');
   grid.innerHTML = '';
@@ -933,12 +951,14 @@ loadWeather();
 setInterval(loadWeather, 30 * 60 * 1000);
 
 function setView(view){
+  currentView = view;
   document.getElementById('weekView').hidden = view !== 'week';
   document.getElementById('monthView').hidden = view !== 'month';
   document.getElementById('toggleWeek').classList.toggle('active', view==='week');
   document.getElementById('toggleMonth').classList.toggle('active', view==='month');
   document.getElementById('railWeek').classList.toggle('active', view==='week');
   document.getElementById('railMonth').classList.toggle('active', view==='month');
+  updatePeopleRow();
 }
 
 document.getElementById('toggleWeek').onclick = ()=>setView('week');
