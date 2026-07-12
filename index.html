@@ -137,7 +137,15 @@
     border-bottom:1px solid var(--line);
     margin-bottom:12px;
   }
-  .person{ display:flex; align-items:center; gap:9px; }
+  .person{
+    display:flex; align-items:center; gap:9px;
+    cursor:pointer;
+    padding:4px 8px;
+    margin:-4px -8px;
+    border-radius:10px;
+    transition:background 0.15s ease;
+  }
+  .person.filter-active{ background:var(--bg); box-shadow:inset 0 0 0 2px var(--line); }
   .avatar{
     width:30px; height:30px;
     border-radius:50%;
@@ -562,6 +570,19 @@
     white-space:nowrap;
   }
 
+  .sync-status{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    color:var(--ink-dim);
+    white-space:nowrap;
+  }
+
+  .weather-tomorrow{
+    font-size:12.5px;
+    color:var(--ink-mid);
+    white-space:nowrap;
+  }
+
   /* ---------- bin day banner ---------- */
   .bin-banner{
     background:var(--c-shared);
@@ -850,6 +871,66 @@
     padding:10px 0 4px;
   }
 
+  /* ---------- Settings PIN lock ---------- */
+  .pin-backdrop{
+    position:fixed; inset:0;
+    background:rgba(46,43,39,0.45);
+    display:flex; align-items:center; justify-content:center;
+    z-index:60;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.15s ease;
+  }
+  .pin-backdrop.open{ opacity:1; pointer-events:auto; }
+  .pin-card{
+    background:#fff;
+    border-radius:16px;
+    padding:26px 28px 22px;
+    min-width:260px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+    text-align:center;
+  }
+  .pin-title{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:17px;
+    margin-bottom:14px;
+  }
+  #pinInput{
+    width:140px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:22px;
+    letter-spacing:8px;
+    text-align:center;
+    padding:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    -webkit-user-select:text;
+    user-select:text;
+  }
+  .pin-error{
+    color:#B23B2E;
+    font-size:12.5px;
+    margin-top:8px;
+  }
+  .pin-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-top:18px;
+  }
+  .pin-btn-secondary, .pin-btn-primary{
+    padding:9px 20px;
+    border-radius:10px;
+    border:none;
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .pin-btn-secondary{ background:var(--bg); color:var(--ink); border:1px solid var(--line); }
+  .pin-btn-primary{ background:var(--ink); color:#fff; }
+
   .popup-card.wide{ max-width:640px; }
   .forecast-row{
     display:flex;
@@ -905,7 +986,9 @@
         <div class="brand-weather" id="weatherBtn">
           <span id="weatherIcon">⛅</span><span id="weatherTemp">--°</span>
         </div>
+        <div class="weather-tomorrow" id="weatherTomorrow" hidden></div>
         <div class="countdown-chip" id="countdownChip" hidden></div>
+        <div class="sync-status" id="syncStatus">—</div>
       </div>
       <div class="topbar-right">
         <div class="view-toggle" id="viewToggle">
@@ -1072,6 +1155,17 @@
             </div>
           </div>
 
+          <div class="settings-row settings-row-stacked" data-name-tag>
+            <div class="settings-label">
+              <div class="settings-title">Also colour-match</div>
+              <div class="settings-sub">Any event whose title mentions this name gets coloured to match, on any calendar</div>
+            </div>
+            <div class="kid-controls">
+              <input type="text" class="kid-name-input" id="nameTagInput">
+              <div class="swatch-row" id="nameTagSwatchRow"></div>
+            </div>
+          </div>
+
           <div class="settings-section-title">Calendar sync</div>
           <div class="settings-row settings-row-stacked">
             <div class="settings-label">
@@ -1093,6 +1187,18 @@
             <div class="settings-inline-form">
               <input type="text" id="locationInput" placeholder="e.g. Newtownabbey" autocomplete="off">
               <button id="locationSaveBtn">Search &amp; save</button>
+            </div>
+          </div>
+
+          <div class="settings-section-title">Security</div>
+          <div class="settings-row settings-row-stacked">
+            <div class="settings-label">
+              <div class="settings-title">Settings PIN</div>
+              <div class="settings-sub">Optional 4-digit PIN required to open this Settings tab. Leave blank to disable.</div>
+            </div>
+            <div class="settings-inline-form">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="settingsPinInput" placeholder="e.g. 1234" autocomplete="off">
+              <button id="settingsPinSaveBtn">Save</button>
             </div>
           </div>
 
@@ -1137,6 +1243,18 @@
 </div>
 
 <div id="nightOverlay"></div>
+
+<div class="pin-backdrop" id="pinBackdrop">
+  <div class="pin-card">
+    <div class="pin-title">Enter Settings PIN</div>
+    <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="pinInput" autocomplete="off">
+    <div class="pin-error" id="pinError" hidden>Incorrect PIN — try again</div>
+    <div class="pin-actions">
+      <button id="pinCancelBtn" class="pin-btn-secondary">Cancel</button>
+      <button id="pinUnlockBtn" class="pin-btn-primary">Unlock</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ============================================================
@@ -1185,7 +1303,9 @@ const DEFAULT_SETTINGS = {
   kids: {
     charlotte: { name: 'Charlotte', colorKey: 'purple', emoji: '🎀' },
     sophie:    { name: 'Sophie',    colorKey: 'blue',   emoji: '🦄' },
-  }
+  },
+  extraNameTag: { name: 'Isla', colorKey: 'rose' },
+  settingsPin: '',
 };
 
 function loadSettings(){
@@ -1203,7 +1323,8 @@ function loadSettings(){
       kids: {
         charlotte: { ...DEFAULT_SETTINGS.kids.charlotte, ...(parsed.kids && parsed.kids.charlotte) },
         sophie:    { ...DEFAULT_SETTINGS.kids.sophie,    ...(parsed.kids && parsed.kids.sophie) },
-      }
+      },
+      extraNameTag: { ...DEFAULT_SETTINGS.extraNameTag, ...parsed.extraNameTag },
     };
   } catch(e){
     return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
@@ -1234,6 +1355,26 @@ function buildPeople(){
 
 let PEOPLE = buildPeople();
 
+// If an event's title mentions Charlotte, Sophie, or the extra name-tag (default
+// Isla), colour it by that person specifically instead of whichever calendar it's
+// actually on — handy for shared-calendar entries like "Charlotte - tumbling".
+function getTitleColorOverride(title){
+  if(!title) return null;
+  const t = title.toLowerCase();
+  const tags = [
+    { name: appSettings.kids.charlotte.name, colorKey: appSettings.kids.charlotte.colorKey },
+    { name: appSettings.kids.sophie.name,    colorKey: appSettings.kids.sophie.colorKey },
+    { name: appSettings.extraNameTag.name,   colorKey: appSettings.extraNameTag.colorKey },
+  ];
+  for(const tag of tags){
+    const n = (tag.name || '').trim().toLowerCase();
+    if(n && t.includes(n)){
+      return COLOR_PALETTE[tag.colorKey] || COLOR_PALETTE.purple;
+    }
+  }
+  return null;
+}
+
 const WEATHER_ICONS = {
   0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
   45:'🌫️', 48:'🌫️',
@@ -1256,6 +1397,9 @@ function rand(){ seed = (seed*9301+49297)%233280; return seed/233280; }
 
 let LIVE_EVENTS = null; // populated once the Worker feed loads successfully
 
+let lastSyncTime = null;
+let lastSyncError = false;
+
 async function loadCalendarData(){
   if(!appSettings.calendarFeedUrl) return; // no feed configured yet — stay in demo mode
   try{
@@ -1269,10 +1413,34 @@ async function loadCalendarData(){
       end: new Date(e.end),
       allDay: !!e.allDay
     }));
+    lastSyncTime = new Date();
+    lastSyncError = false;
   } catch(err){
     console.error('Calendar feed error:', err);
+    lastSyncError = true;
     // keep showing whatever we last had (or demo mode if this was the first load)
   }
+  updateSyncStatus();
+}
+
+function updateSyncStatus(){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  if(!appSettings.calendarFeedUrl){
+    el.textContent = 'Demo mode — no calendar feed set';
+    return;
+  }
+  if(lastSyncError && !lastSyncTime){
+    el.textContent = 'Sync failed';
+    return;
+  }
+  if(!lastSyncTime){
+    el.textContent = 'Syncing…';
+    return;
+  }
+  const mins = Math.round((Date.now() - lastSyncTime.getTime()) / 60000);
+  const label = mins < 1 ? 'Synced just now' : ('Synced ' + mins + 'm ago');
+  el.textContent = lastSyncError ? (label + ' (last attempt failed)') : label;
 }
 
 function dateKey(y,m,d){ return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
@@ -1371,6 +1539,7 @@ function getWeekStart(d){
 }
 
 let currentView = 'week';
+let activeFilter = null; // person key, or null to show everyone
 let weekEventsFlat = [];
 let monthEventsFlat = [];
 
@@ -1384,7 +1553,7 @@ function renderPeopleRow(flatEvents){
   Object.entries(PEOPLE).forEach(([key,p]) => {
     const c = counts[key];
     const el = document.createElement('div');
-    el.className = 'person';
+    el.className = 'person' + (activeFilter === key ? ' filter-active' : '');
     el.innerHTML =
       '<div class="avatar" style="background:'+p.color+'">'+p.initial+'</div>'+
       '<div class="person-info">'+
@@ -1392,6 +1561,11 @@ function renderPeopleRow(flatEvents){
         '<div class="person-bar-track"><div class="person-bar-fill" style="width:'+(c/total*100)+'%;background:'+p.color+'"></div></div>'+
       '</div>'+
       '<div class="person-count">'+c+'</div>';
+    el.addEventListener('click', () => {
+      activeFilter = (activeFilter === key) ? null : key;
+      renderWeek();
+      renderMonth();
+    });
     row.appendChild(el);
   });
 }
@@ -1446,21 +1620,23 @@ function renderWeek(){
     col.className = 'day-col' + (isToday ? ' today-col' : '');
     col.style.height = totalHeight + 'px';
 
-    const laidOut = layoutOverlaps(events[i]);
+    const dayEvents = activeFilter ? events[i].filter(ev => ev.person === activeFilter) : events[i];
+    const laidOut = layoutOverlaps(dayEvents);
     laidOut.forEach(ev => {
       const top = (ev.start - HOUR_START) * ROW_HEIGHT;
       const height = (ev.end - ev.start) * ROW_HEIGHT;
       const width = 100 / ev._cols;
       const left = ev._col * width;
       const p = PEOPLE[ev.person];
+      const override = getTitleColorOverride(ev.title);
       const block = document.createElement('div');
       block.className = 'event-block';
       block.style.top = top + 'px';
       block.style.height = Math.max(height - 3, 16) + 'px';
       block.style.left = 'calc(' + left + '% + 2px)';
       block.style.width = 'calc(' + width + '% - 5px)';
-      block.style.background = p.color;
-      block.style.color = p.ink;
+      block.style.background = override ? override.color : p.color;
+      block.style.color = override ? override.ink : p.ink;
       block.innerHTML =
         '<div class="etitle">'+ev.title+'</div>'+
         '<div class="etime">'+fmtTime(ev.start)+' – '+fmtTime(ev.end)+'</div>';
@@ -1560,14 +1736,15 @@ function renderMonth(){
     if(!outside && events[dayNum]){
       const wrap = document.createElement('div');
       wrap.className = 'mevents';
-      const list = events[dayNum];
+      const list = activeFilter ? events[dayNum].filter(item => item.person === activeFilter) : events[dayNum];
       const dayLabel = new Date(year, month, dayNum).toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long'});
       list.forEach(item => {
         const p = PEOPLE[item.person];
+        const override = getTitleColorOverride(item.title);
         const row = document.createElement('div');
         row.className = 'mevent';
-        row.style.background = p.color;
-        row.style.color = p.ink;
+        row.style.background = override ? override.color : p.color;
+        row.style.color = override ? override.ink : p.ink;
         row.textContent = item.title;
         row.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1608,13 +1785,15 @@ popupCard.addEventListener('click', hidePopup);
 
 function showSingleEvent(ev){
   const p = PEOPLE[ev.person];
+  const override = getTitleColorOverride(ev.title);
+  const displayColor = override ? override.color : p.color;
   const timeStr = (ev.start !== undefined) ? fmtTime(ev.start)+' – '+fmtTime(ev.end) : ev.time;
   const metaLine = timeStr ? (p.name+' &nbsp;·&nbsp; '+timeStr) : p.name;
   showPopup(
     '<div class="popup-title">'+ev.title+'</div>'+
-    '<div class="popup-meta"><span class="pdot" style="background:'+p.color+'"></span>'+metaLine+'</div>'+
+    '<div class="popup-meta"><span class="pdot" style="background:'+displayColor+'"></span>'+metaLine+'</div>'+
     '<div class="popup-hint">Tap anywhere to close</div>',
-    p.color
+    displayColor
   );
 }
 
@@ -1648,9 +1827,16 @@ async function loadWeather(){
     forecastCache = data;
     document.getElementById('weatherIcon').textContent = weatherIcon(data.current_weather.weathercode);
     document.getElementById('weatherTemp').textContent = Math.round(data.current_weather.temperature) + '°';
+    if(data.daily && data.daily.weathercode && data.daily.weathercode.length > 1){
+      const tomorrowIcon = weatherIcon(data.daily.weathercode[1]);
+      const tomorrowHigh = Math.round(data.daily.temperature_2m_max[1]);
+      document.getElementById('weatherTomorrow').textContent = 'tomorrow ' + tomorrowIcon + ' ' + tomorrowHigh + '°';
+      document.getElementById('weatherTomorrow').hidden = false;
+    }
   } catch(e){
     document.getElementById('weatherIcon').textContent = '⛅';
     document.getElementById('weatherTemp').textContent = '--°';
+    document.getElementById('weatherTomorrow').hidden = true;
   }
 }
 
@@ -1721,7 +1907,7 @@ document.getElementById('railWeek').onclick = ()=>setView('week');
 document.getElementById('railMonth').onclick = ()=>setView('month');
 document.getElementById('railList').onclick = ()=>setView('list');
 document.getElementById('railChores').onclick = ()=>setView('chores');
-document.getElementById('railSettings').onclick = ()=>setView('settings');
+document.getElementById('railSettings').onclick = ()=>requestSettingsAccess();
 document.getElementById('monthPrev').onclick = ()=>{ monthOffset--; renderMonth(); };
 document.getElementById('monthNext').onclick = ()=>{ monthOffset++; renderMonth(); };
 
@@ -2069,6 +2255,25 @@ function renderKidEmojiPicker(kidKey){
   });
 }
 
+function renderNameTagSwatches(){
+  const row = document.getElementById('nameTagSwatchRow');
+  row.innerHTML = '';
+  Object.entries(COLOR_PALETTE).forEach(([key, pal]) => {
+    const dot = document.createElement('div');
+    dot.className = 'swatch' + (appSettings.extraNameTag.colorKey === key ? ' selected' : '');
+    dot.style.background = pal.color;
+    dot.title = pal.label;
+    dot.addEventListener('click', () => {
+      appSettings.extraNameTag.colorKey = key;
+      saveSettings();
+      renderSettingsView();
+      renderWeek();
+      renderMonth();
+    });
+    row.appendChild(dot);
+  });
+}
+
 function renderSettingsView(){
   // Night dimming
   document.getElementById('nightToggle').classList.toggle('on', appSettings.nightDimEnabled);
@@ -2094,6 +2299,10 @@ function renderSettingsView(){
     renderKidEmojiPicker(key);
   });
 
+  // Extra colour-matched name (e.g. Isla)
+  document.getElementById('nameTagInput').value = appSettings.extraNameTag.name;
+  renderNameTagSwatches();
+
   // Calendar feed
   document.getElementById('feedUrlInput').value = appSettings.calendarFeedUrl;
 
@@ -2101,6 +2310,9 @@ function renderSettingsView(){
   document.getElementById('locationInput').value = appSettings.locationName;
   document.getElementById('locationCurrentSub').textContent =
     'Currently: ' + appSettings.locationName + ' (' + appSettings.locationLat.toFixed(2) + ', ' + appSettings.locationLon.toFixed(2) + ')';
+
+  // Security
+  document.getElementById('settingsPinInput').value = appSettings.settingsPin;
 }
 
 document.getElementById('nightToggle').addEventListener('click', () => {
@@ -2153,7 +2365,7 @@ document.querySelectorAll('.person-name-input').forEach(input => {
   });
 });
 
-document.querySelectorAll('.kid-name-input').forEach(input => {
+document.querySelectorAll('.kid-name-input[data-kid]').forEach(input => {
   const key = input.dataset.kid;
   input.addEventListener('change', () => {
     appSettings.kids[key].name = input.value;
@@ -2161,6 +2373,14 @@ document.querySelectorAll('.kid-name-input').forEach(input => {
     renderSettingsView();
     renderChores();
   });
+});
+
+document.getElementById('nameTagInput').addEventListener('change', (e) => {
+  appSettings.extraNameTag.name = e.target.value;
+  saveSettings();
+  renderSettingsView();
+  renderWeek();
+  renderMonth();
 });
 
 document.getElementById('feedUrlSaveBtn').addEventListener('click', () => {
@@ -2234,6 +2454,50 @@ document.getElementById('resetSettingsBtn').addEventListener('click', () => {
   loadWeather();
 });
 
+document.getElementById('settingsPinSaveBtn').addEventListener('click', () => {
+  const val = document.getElementById('settingsPinInput').value.trim();
+  appSettings.settingsPin = /^\d{0,4}$/.test(val) ? val : appSettings.settingsPin;
+  saveSettings();
+  renderSettingsView();
+});
+
+// ---------- Settings PIN gate ----------
+function requestSettingsAccess(){
+  if(!appSettings.settingsPin){
+    setView('settings');
+    return;
+  }
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinError').hidden = true;
+  document.getElementById('pinBackdrop').classList.add('open');
+  document.getElementById('pinInput').focus();
+}
+
+function closePinModal(){
+  document.getElementById('pinBackdrop').classList.remove('open');
+}
+
+function attemptPinUnlock(){
+  const val = document.getElementById('pinInput').value;
+  if(val === appSettings.settingsPin){
+    closePinModal();
+    setView('settings');
+  } else {
+    document.getElementById('pinError').hidden = false;
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinInput').focus();
+  }
+}
+
+document.getElementById('pinCancelBtn').addEventListener('click', closePinModal);
+document.getElementById('pinUnlockBtn').addEventListener('click', attemptPinUnlock);
+document.getElementById('pinInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') attemptPinUnlock();
+});
+document.getElementById('pinBackdrop').addEventListener('click', (e) => {
+  if(e.target.id === 'pinBackdrop') closePinModal();
+});
+
 function updateNightMode(){
   if(!appSettings.nightDimEnabled){
     document.getElementById('nightOverlay').classList.remove('active');
@@ -2260,6 +2524,8 @@ setInterval(updateNightMode, 60 * 1000);
 tickClock();
 setInterval(tickClock, 1000);
 setInterval(refreshAll, 10*60*1000);
+updateSyncStatus();
+setInterval(updateSyncStatus, 60 * 1000);
 </script>
 
 </body>
