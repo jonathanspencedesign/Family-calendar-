@@ -177,25 +177,34 @@
   }
   .day-head.today .dnum{ background:var(--today-red); color:#fff; }
 
-  .week-body{
+  .week-scroll{
     flex:1;
+    overflow-y:auto;
+    min-height:0;
+    -webkit-overflow-scrolling:touch;
+  }
+  .week-scroll::-webkit-scrollbar{ width:5px; }
+  .week-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+
+  .week-body{
     display:grid;
     grid-template-columns: 52px repeat(7, 1fr);
-    min-height:0;
     position:relative;
   }
 
   .hour-col{
-    display:grid;
-    grid-template-rows: repeat(var(--hours), 1fr);
+    display:flex;
+    flex-direction:column;
   }
   .hour-label{
+    height: var(--row-h);
     font-family:'IBM Plex Mono', monospace;
     font-size:10.5px;
     color:var(--ink-mid);
     text-align:right;
     padding-right:8px;
     transform: translateY(-6px);
+    flex-shrink:0;
   }
 
   .day-col{
@@ -203,8 +212,8 @@
     border-left:1px solid var(--line);
     background-image: repeating-linear-gradient(
       to bottom,
-      transparent, transparent calc(100%/var(--hours) - 1px),
-      var(--line) calc(100%/var(--hours) - 1px), var(--line) calc(100%/var(--hours))
+      transparent, transparent calc(var(--row-h) - 1px),
+      var(--line) calc(var(--row-h) - 1px), var(--line) var(--row-h)
     );
   }
   .day-col.today-col{ background-color: #FFF7F0; }
@@ -417,7 +426,9 @@
 
     <div class="view" id="weekView">
       <div class="week-header" id="weekHeader"></div>
-      <div class="week-body" id="weekBody"></div>
+      <div class="week-scroll" id="weekScroll">
+        <div class="week-body" id="weekBody"></div>
+      </div>
     </div>
 
     <div class="view" id="monthView" hidden>
@@ -442,7 +453,7 @@ const PEOPLE = {
 
 // URL of the Cloudflare Worker that merges the Google Calendar feeds.
 // Leave blank to keep showing demo/placeholder events.
-const CALENDAR_FEED_URL = 'https://family-calendar.jonathanspencedesign.workers.dev/';
+const CALENDAR_FEED_URL = '';
 
 // Set to the tablet's actual location. Defaults to Newtownabbey.
 const LOCATION = { name:'Newtownabbey', lat:54.6779, lon:-5.9249 };
@@ -458,9 +469,11 @@ const WEATHER_ICONS = {
 };
 function weatherIcon(code){ return WEATHER_ICONS[code] || '🌡️'; }
 
-const HOUR_START = 7;
-const HOUR_END = 21;
+const HOUR_START = 0;
+const HOUR_END = 24;
 const HOURS = HOUR_END - HOUR_START;
+const ROW_HEIGHT = 64; // px per hour in the week view — taller rows, day is scrollable
+const DEFAULT_SCROLL_HOUR = 7; // where the week view opens by default (still scrollable to see all 24h)
 
 // ---------- seeded rng so layout is stable across renders ----------
 let seed = 11;
@@ -526,15 +539,16 @@ function buildWeekEventsMock(weekDates){
     ['dad','Gym — legs day'], ['mum','Book club'], ['shared','Half term starts'],
   ];
   const days = [];
+  const DEMO_START = 8, DEMO_END = 20;
   for(let d=0; d<7; d++){
     const count = rand() < 0.1 ? 0 : (rand() < 0.5 ? 1 : (rand() < 0.85 ? 2 : 3));
     const evs = [];
-    let cursor = HOUR_START + rand()*2;
+    let cursor = DEMO_START + rand()*2;
     for(let i=0;i<count;i++){
       const [person, title] = titles[Math.floor(rand()*titles.length)];
       const dur = 0.75 + rand()*1.5;
-      const start = Math.min(cursor, HOUR_END-1);
-      const end = Math.min(start+dur, HOUR_END);
+      const start = Math.min(cursor, DEMO_END-1);
+      const end = Math.min(start+dur, DEMO_END);
       evs.push({ person, title, start, end });
       cursor = end + 0.5 + rand()*1.5;
     }
@@ -618,12 +632,14 @@ function renderWeek(){
 
   // body
   const body = document.getElementById('weekBody');
+  const scrollWrap = document.getElementById('weekScroll');
   body.innerHTML = '';
-  body.style.setProperty('--hours', HOURS);
+  body.style.setProperty('--row-h', ROW_HEIGHT + 'px');
+
+  const totalHeight = HOURS * ROW_HEIGHT;
 
   const hourCol = document.createElement('div');
   hourCol.className = 'hour-col';
-  hourCol.style.setProperty('--hours', HOURS);
   for(let h=HOUR_START; h<HOUR_END; h++){
     const lbl = document.createElement('div');
     lbl.className = 'hour-label';
@@ -636,19 +652,19 @@ function renderWeek(){
     const isToday = d.toDateString() === todayStr;
     const col = document.createElement('div');
     col.className = 'day-col' + (isToday ? ' today-col' : '');
-    col.style.setProperty('--hours', HOURS);
+    col.style.height = totalHeight + 'px';
 
     const laidOut = layoutOverlaps(events[i]);
     laidOut.forEach(ev => {
-      const top = (ev.start - HOUR_START) / HOURS * 100;
-      const height = (ev.end - ev.start) / HOURS * 100;
+      const top = (ev.start - HOUR_START) * ROW_HEIGHT;
+      const height = (ev.end - ev.start) * ROW_HEIGHT;
       const width = 100 / ev._cols;
       const left = ev._col * width;
       const p = PEOPLE[ev.person];
       const block = document.createElement('div');
       block.className = 'event-block';
-      block.style.top = top + '%';
-      block.style.height = 'calc(' + height + '% - 3px)';
+      block.style.top = top + 'px';
+      block.style.height = Math.max(height - 3, 16) + 'px';
       block.style.left = 'calc(' + left + '% + 2px)';
       block.style.width = 'calc(' + width + '% - 5px)';
       block.style.background = p.color;
@@ -661,6 +677,13 @@ function renderWeek(){
     });
     body.appendChild(col);
   });
+
+  // Open the view scrolled to a sensible default (e.g. 7am) rather than midnight,
+  // but the whole 24h day remains reachable by scrolling up/down.
+  if(scrollWrap.dataset.scrolled !== 'true'){
+    scrollWrap.scrollTop = DEFAULT_SCROLL_HOUR * ROW_HEIGHT;
+    scrollWrap.dataset.scrolled = 'true';
+  }
 }
 
 function buildMonthEvents(daysInMonth, year, month){
@@ -668,7 +691,15 @@ function buildMonthEvents(daysInMonth, year, month){
     const events = {};
     for(let d=1; d<=daysInMonth; d++){
       const list = eventsOnDate(year, month, d);
-      if(list && list.length) events[d] = list.map(ev => [ev.person, ev.title]);
+      if(list && list.length){
+        events[d] = list.map(ev => ({
+          person: ev.person,
+          title: ev.title,
+          timeLabel: ev.allDay ? 'All day' :
+            (fmtTime(ev.start.getUTCHours() + ev.start.getUTCMinutes()/60) + ' – ' +
+             fmtTime(ev.end.getUTCHours() + ev.end.getUTCMinutes()/60))
+        }));
+      }
     }
     return events;
   }
@@ -677,15 +708,20 @@ function buildMonthEvents(daysInMonth, year, month){
 
 function buildMonthEventsMock(daysInMonth){
   const pool = [
-    ['dad','Site visit'], ['mum','School run'], ['shared','Family dinner'],
-    ['dad','Client call'], ['mum','Physio'], ['shared','Bins out'],
-    ['dad','Table tennis'], ['mum','Coffee w/ Claire'], ['shared','Grandma visiting'],
+    ['dad','Site visit','09:00 – 10:30'], ['mum','School run','08:30 – 8:45am'],
+    ['shared','Family dinner','18:30 – 19:30'], ['dad','Client call','13:00 – 13:30'],
+    ['mum','Physio','11:00 – 11:45'], ['shared','Bins out','20:00'],
+    ['dad','Table tennis','20:00 – 21:30'], ['mum','Coffee w/ Claire','10:00 – 11:00'],
+    ['shared','Grandma visiting','12:00 – 14:00'],
   ];
   const events = {};
   for(let d=1; d<=daysInMonth; d++){
     const count = rand() < 0.2 ? 0 : (rand() < 0.45 ? 1 : (rand() < 0.7 ? 2 : (rand() < 0.9 ? 3 : (rand() < 0.97 ? 4 : 5))));
     const items = [];
-    for(let i=0;i<count;i++) items.push(pool[Math.floor(rand()*pool.length)]);
+    for(let i=0;i<count;i++){
+      const [person, title, timeLabel] = pool[Math.floor(rand()*pool.length)];
+      items.push({ person, title, timeLabel });
+    }
     if(items.length) events[d] = items;
   }
   return events;
@@ -718,16 +754,16 @@ function renderMonth(){
       wrap.className = 'mevents';
       const list = events[dayNum];
       const dayLabel = new Date(year, month, dayNum).toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long'});
-      list.forEach(([person,title])=>{
-        const p = PEOPLE[person];
+      list.forEach(item => {
+        const p = PEOPLE[item.person];
         const row = document.createElement('div');
         row.className = 'mevent';
         row.style.background = p.color;
         row.style.color = p.ink;
-        row.textContent = title;
+        row.textContent = item.title;
         row.addEventListener('click', (e) => {
           e.stopPropagation();
-          showSingleEvent({ person, title, time: '' });
+          showSingleEvent({ person: item.person, title: item.title, time: item.timeLabel || '' });
         });
         wrap.appendChild(row);
       });
@@ -859,7 +895,11 @@ document.getElementById('toggleWeek').onclick = ()=>setView('week');
 document.getElementById('toggleMonth').onclick = ()=>setView('month');
 document.getElementById('railWeek').onclick = ()=>setView('week');
 document.getElementById('railMonth').onclick = ()=>setView('month');
-document.getElementById('btnToday').onclick = ()=>refreshAll();
+document.getElementById('btnToday').onclick = ()=>{
+  const sw = document.getElementById('weekScroll');
+  if(sw) sw.dataset.scrolled = 'false';
+  refreshAll();
+};
 
 function tickClock(){
   document.getElementById('clock').textContent =
