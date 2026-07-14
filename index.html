@@ -931,6 +931,111 @@
   .pin-btn-secondary{ background:var(--bg); color:var(--ink); border:1px solid var(--line); }
   .pin-btn-primary{ background:var(--ink); color:#fff; }
 
+  /* ---------- weather tab ---------- */
+  .weather-scroll{
+    flex:1;
+    overflow-y:auto;
+    min-height:0;
+    -webkit-overflow-scrolling:touch;
+  }
+  .weather-scroll::-webkit-scrollbar{ width:5px; }
+  .weather-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+
+  .weather-now-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px 22px;
+    margin-bottom:20px;
+  }
+  .wn-top{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:16px;
+  }
+  .wn-icon{ font-size:52px; line-height:1; }
+  .wn-temp{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:40px;
+    line-height:1;
+  }
+  .wn-desc{
+    font-size:14px;
+    color:var(--ink-mid);
+    margin-top:4px;
+  }
+  .wn-details{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));
+    gap:12px;
+    border-top:1px solid var(--line);
+    padding-top:16px;
+  }
+  .wn-stat{ display:flex; flex-direction:column; gap:3px; }
+  .wn-stat-label{
+    font-size:11px;
+    color:var(--ink-mid);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+  .wn-stat-value{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:15px;
+    color:var(--ink);
+  }
+
+  .weather-section-title{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--ink-mid);
+    margin:4px 0 10px;
+  }
+
+  .hourly-row{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:6px;
+    margin-bottom:22px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .hourly-item{
+    flex-shrink:0;
+    min-width:64px;
+    text-align:center;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 8px 10px;
+  }
+  .hourly-item .h-time{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-mid); margin-bottom:6px; }
+  .hourly-item .h-icon{ font-size:22px; margin-bottom:6px; }
+  .hourly-item .h-temp{ font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:13px; }
+  .hourly-item .h-precip{ font-size:10.5px; color:var(--c-mum-ink); margin-top:3px; }
+
+  .daily-list{ display:flex; flex-direction:column; gap:8px; }
+  .daily-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 16px;
+  }
+  .daily-row.today{ background:#FFF7EC; border-color:#F0DDB8; }
+  .daily-row .d-day{ font-family:'Quicksand', sans-serif; font-weight:700; font-size:13px; width:44px; flex-shrink:0; }
+  .daily-row .d-icon{ font-size:22px; width:32px; flex-shrink:0; text-align:center; }
+  .daily-row .d-desc{ flex:1; font-size:13px; color:var(--ink-mid); }
+  .daily-row .d-precip{ font-size:12px; color:var(--c-mum-ink); width:44px; text-align:right; flex-shrink:0; }
+  .daily-row .d-temps{ font-family:'IBM Plex Mono', monospace; font-size:13.5px; width:80px; text-align:right; flex-shrink:0; }
+  .daily-row .d-temps .lo{ color:var(--ink-mid); }
+
   .popup-card.wide{ max-width:640px; }
   .forecast-row{
     display:flex;
@@ -972,6 +1077,9 @@
     <div class="rail-btn" id="railChores" title="Chores">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V3Z"/><path d="m8.5 12 1.5 1.5L13 10.5"/><path d="m8.5 17 1.5 1.5L13 15.5"/></svg>
     </div>
+    <div class="rail-btn" id="railWeather" title="Weather">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.8A4 4 0 0 0 6.5 19h11Z"/><path d="M12 3v1M4.2 5.2l.7.7M19.8 5.2l-.7.7"/></svg>
+    </div>
     <div class="rail-spacer"></div>
     <div class="rail-btn" id="railSettings" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -996,6 +1104,7 @@
           <button id="toggleMonth">Month</button>
           <button id="toggleList">List</button>
           <button id="toggleChores">Chores</button>
+          <button id="toggleWeather">Weather</button>
         </div>
       </div>
     </div>
@@ -1235,6 +1344,29 @@
         </div>
       </div>
     </div>
+
+    <div class="view" id="weatherView" hidden>
+      <div class="weather-scroll" id="weatherScroll">
+
+        <div class="weather-now-card">
+          <div class="wn-top">
+            <div class="wn-icon" id="wnIcon">⛅</div>
+            <div class="wn-temp-block">
+              <div class="wn-temp" id="wnTemp">--°</div>
+              <div class="wn-desc" id="wnDesc">—</div>
+            </div>
+          </div>
+          <div class="wn-details" id="wnDetails"></div>
+        </div>
+
+        <div class="weather-section-title">Next 24 hours</div>
+        <div class="hourly-row" id="hourlyRow"></div>
+
+        <div class="weather-section-title">10-day forecast</div>
+        <div class="daily-list" id="dailyList"></div>
+
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1385,6 +1517,17 @@ const WEATHER_ICONS = {
   95:'⛈️', 96:'⛈️', 99:'⛈️',
 };
 function weatherIcon(code){ return WEATHER_ICONS[code] || '🌡️'; }
+
+const WEATHER_LABELS = {
+  0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
+  45:'Foggy', 48:'Foggy',
+  51:'Light drizzle', 53:'Drizzle', 55:'Heavy drizzle',
+  61:'Light rain', 63:'Rain', 65:'Heavy rain',
+  71:'Light snow', 73:'Snow', 75:'Heavy snow',
+  80:'Rain showers', 81:'Rain showers', 82:'Violent showers',
+  95:'Thunderstorm', 96:'Thunderstorm', 99:'Thunderstorm',
+};
+function weatherLabel(code){ return WEATHER_LABELS[code] || 'Mixed conditions'; }
 
 const HOUR_START = 0;
 const HOUR_END = 24;
@@ -1815,24 +1958,33 @@ let forecastCache = null;
 
 async function fetchWeather(){
   const url = 'https://api.open-meteo.com/v1/forecast?latitude='+appSettings.locationLat+'&longitude='+appSettings.locationLon+
-    '&daily=weathercode,temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&forecast_days=10';
+    '&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,uv_index'+
+    '&hourly=temperature_2m,weather_code,precipitation_probability'+
+    '&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset'+
+    '&timezone=auto&forecast_days=10';
   const res = await fetch(url);
   if(!res.ok) throw new Error('weather fetch failed');
   return res.json();
+}
+
+function windDirectionLabel(deg){
+  const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+  return dirs[Math.round(deg / 45) % 8];
 }
 
 async function loadWeather(){
   try{
     const data = await fetchWeather();
     forecastCache = data;
-    document.getElementById('weatherIcon').textContent = weatherIcon(data.current_weather.weathercode);
-    document.getElementById('weatherTemp').textContent = Math.round(data.current_weather.temperature) + '°';
+    document.getElementById('weatherIcon').textContent = weatherIcon(data.current.weather_code);
+    document.getElementById('weatherTemp').textContent = Math.round(data.current.temperature_2m) + '°';
     if(data.daily && data.daily.weathercode && data.daily.weathercode.length > 1){
       const tomorrowIcon = weatherIcon(data.daily.weathercode[1]);
       const tomorrowHigh = Math.round(data.daily.temperature_2m_max[1]);
       document.getElementById('weatherTomorrow').textContent = 'tomorrow ' + tomorrowIcon + ' ' + tomorrowHigh + '°';
       document.getElementById('weatherTomorrow').hidden = false;
     }
+    if(currentView === 'weather') renderWeatherTab();
   } catch(e){
     document.getElementById('weatherIcon').textContent = '⛅';
     document.getElementById('weatherTemp').textContent = '--°';
@@ -1840,37 +1992,68 @@ async function loadWeather(){
   }
 }
 
-function showForecast(){
+function renderWeatherTab(){
   if(!forecastCache){
-    showPopup('<div class="popup-title">Weather unavailable</div><div class="popup-meta">Check the tablet\'s internet connection.</div><div class="popup-hint">Tap anywhere to close</div>');
+    document.getElementById('wnDesc').textContent = 'Weather unavailable — check the connection.';
     return;
   }
-  const days = forecastCache.daily.time;
-  const todayStr = new Date().toDateString();
-  const cards = days.map((dateStr,i) => {
-    const d = new Date(dateStr);
-    const isToday = d.toDateString() === todayStr;
-    const label = isToday ? 'Today' : d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
-    const hi = Math.round(forecastCache.daily.temperature_2m_max[i]);
-    const lo = Math.round(forecastCache.daily.temperature_2m_min[i]);
-    return '<div class="forecast-day'+(isToday?' today':'')+'">'+
-      '<div class="fname">'+label+'</div>'+
-      '<div class="ficon">'+weatherIcon(forecastCache.daily.weathercode[i])+'</div>'+
-      '<div class="fhigh">'+hi+'°</div>'+
-      '<div class="flow">'+lo+'°</div>'+
+  const c = forecastCache.current;
+
+  document.getElementById('wnIcon').textContent = weatherIcon(c.weather_code);
+  document.getElementById('wnTemp').textContent = Math.round(c.temperature_2m) + '°';
+  document.getElementById('wnDesc').textContent = appSettings.locationName + ' · ' + weatherLabel(c.weather_code);
+
+  const details = [
+    ['Feels like', Math.round(c.apparent_temperature) + '°'],
+    ['Humidity', Math.round(c.relative_humidity_2m) + '%'],
+    ['Wind', Math.round(c.wind_speed_10m) + ' km/h ' + windDirectionLabel(c.wind_direction_10m)],
+    ['UV index', Math.round(c.uv_index)],
+  ];
+  document.getElementById('wnDetails').innerHTML = details.map(([label,val]) =>
+    '<div class="wn-stat"><div class="wn-stat-label">'+label+'</div><div class="wn-stat-value">'+val+'</div></div>'
+  ).join('');
+
+  // Next 24 hours — find the current hour in the hourly arrays and show the next 24 from there
+  const nowMs = Date.now();
+  const hourly = forecastCache.hourly;
+  let startIdx = hourly.time.findIndex(t => new Date(t).getTime() >= nowMs);
+  if(startIdx === -1) startIdx = 0;
+  const hourlyHtml = hourly.time.slice(startIdx, startIdx + 24).map((t,i) => {
+    const idx = startIdx + i;
+    const d = new Date(t);
+    const label = i === 0 ? 'Now' : d.toLocaleTimeString('en-GB',{hour:'numeric', hour12:true}).replace(' ','').toLowerCase();
+    return '<div class="hourly-item">'+
+      '<div class="h-time">'+label+'</div>'+
+      '<div class="h-icon">'+weatherIcon(hourly.weather_code[idx])+'</div>'+
+      '<div class="h-temp">'+Math.round(hourly.temperature_2m[idx])+'°</div>'+
+      '<div class="h-precip">'+hourly.precipitation_probability[idx]+'%</div>'+
     '</div>';
   }).join('');
-  popupCard.classList.add('wide');
-  showPopup(
-    '<div class="popup-title">'+appSettings.locationName+' — 10 day forecast</div>'+
-    '<div class="forecast-row">'+cards+'</div>'+
-    '<div class="popup-hint">Tap anywhere to close</div>'
-  );
+  document.getElementById('hourlyRow').innerHTML = hourlyHtml;
+
+  // 10-day forecast
+  const daily = forecastCache.daily;
+  const todayStr = new Date().toDateString();
+  const dailyHtml = daily.time.map((dateStr, i) => {
+    const d = new Date(dateStr);
+    const isToday = d.toDateString() === todayStr;
+    const dayLabel = isToday ? 'Today' : d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
+    const hi = Math.round(daily.temperature_2m_max[i]);
+    const lo = Math.round(daily.temperature_2m_min[i]);
+    return '<div class="daily-row'+(isToday?' today':'')+'">'+
+      '<div class="d-day">'+dayLabel+'</div>'+
+      '<div class="d-icon">'+weatherIcon(daily.weathercode[i])+'</div>'+
+      '<div class="d-desc">'+weatherLabel(daily.weathercode[i])+'</div>'+
+      '<div class="d-precip">💧'+daily.precipitation_probability_max[i]+'%</div>'+
+      '<div class="d-temps"><span>'+hi+'°</span> <span class="lo">'+lo+'°</span></div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('dailyList').innerHTML = dailyHtml;
 }
 
 document.getElementById('weatherBtn').addEventListener('click', (e) => {
   e.stopPropagation();
-  showForecast();
+  setView('weather');
 });
 
 loadWeather();
@@ -1883,19 +2066,23 @@ function setView(view){
   document.getElementById('listView').hidden = view !== 'list';
   document.getElementById('choresView').hidden = view !== 'chores';
   document.getElementById('settingsView').hidden = view !== 'settings';
+  document.getElementById('weatherView').hidden = view !== 'weather';
   document.getElementById('toggleWeek').classList.toggle('active', view==='week');
   document.getElementById('toggleMonth').classList.toggle('active', view==='month');
   document.getElementById('toggleList').classList.toggle('active', view==='list');
   document.getElementById('toggleChores').classList.toggle('active', view==='chores');
+  document.getElementById('toggleWeather').classList.toggle('active', view==='weather');
   document.getElementById('railWeek').classList.toggle('active', view==='week');
   document.getElementById('railMonth').classList.toggle('active', view==='month');
   document.getElementById('railList').classList.toggle('active', view==='list');
   document.getElementById('railChores').classList.toggle('active', view==='chores');
   document.getElementById('railSettings').classList.toggle('active', view==='settings');
-  document.getElementById('peopleRow').style.display = (view==='list' || view==='chores' || view==='settings') ? 'none' : 'flex';
+  document.getElementById('railWeather').classList.toggle('active', view==='weather');
+  document.getElementById('peopleRow').style.display = (view==='list' || view==='chores' || view==='settings' || view==='weather') ? 'none' : 'flex';
   if(view === 'list') renderShoppingList();
   if(view === 'chores') renderChores();
   if(view === 'settings') renderSettingsView();
+  if(view === 'weather') renderWeatherTab();
   updatePeopleRow();
 }
 
@@ -1903,10 +2090,12 @@ document.getElementById('toggleWeek').onclick = ()=>setView('week');
 document.getElementById('toggleMonth').onclick = ()=>setView('month');
 document.getElementById('toggleList').onclick = ()=>setView('list');
 document.getElementById('toggleChores').onclick = ()=>setView('chores');
+document.getElementById('toggleWeather').onclick = ()=>setView('weather');
 document.getElementById('railWeek').onclick = ()=>setView('week');
 document.getElementById('railMonth').onclick = ()=>setView('month');
 document.getElementById('railList').onclick = ()=>setView('list');
 document.getElementById('railChores').onclick = ()=>setView('chores');
+document.getElementById('railWeather').onclick = ()=>setView('weather');
 document.getElementById('railSettings').onclick = ()=>requestSettingsAccess();
 document.getElementById('monthPrev').onclick = ()=>{ monthOffset--; renderMonth(); };
 document.getElementById('monthNext').onclick = ()=>{ monthOffset++; renderMonth(); };
