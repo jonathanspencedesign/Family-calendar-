@@ -731,7 +731,7 @@
     white-space:nowrap;
   }
 
-  #pastePlanInput{
+  #pastePlanInput, #bulkIngredientsInput{
     width:100%;
     padding:10px 14px;
     border-radius:10px;
@@ -1435,6 +1435,14 @@
             </div>
             <textarea id="pastePlanInput" rows="4" placeholder="Monday: Spaghetti bolognese&#10;Tuesday: Tacos&#10;..."></textarea>
             <button id="pastePlanSaveBtn" class="settings-action-btn">Save plan</button>
+          </div>
+          <div class="settings-row settings-row-stacked">
+            <div class="settings-label">
+              <div class="settings-title">Add ingredients to shopping list</div>
+              <div class="settings-sub">Paste everything at once — one item per line or comma-separated, no need to go day by day</div>
+            </div>
+            <textarea id="bulkIngredientsInput" rows="4" placeholder="chicken breast, tortilla wraps, peppers&#10;beef mince, spaghetti, tinned tomatoes&#10;..."></textarea>
+            <button id="bulkIngredientsSaveBtn" class="settings-action-btn">Add all to list</button>
           </div>
 
           <div class="settings-section-title">Data</div>
@@ -2480,7 +2488,11 @@ function renderMealsView(){
     addBtn.addEventListener('click', () => {
       const raw = textarea.value;
       const parts = raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
-      parts.forEach(p => addShoppingItem(p));
+      parts.forEach((p, i) => {
+        shoppingList.push({ id: Date.now() + '-' + i + '-' + Math.random().toString(36).slice(2,7), text: p, done: false });
+      });
+      renderShoppingList();
+      pushShoppingList();
       textarea.value = '';
       box.hidden = true;
     });
@@ -2520,6 +2532,18 @@ document.getElementById('pastePlanSaveBtn').addEventListener('click', () => {
   pushMealPlan();
   if(currentView === 'meals') renderMealsView();
   document.getElementById('pastePlanInput').value = '';
+});
+
+document.getElementById('bulkIngredientsSaveBtn').addEventListener('click', () => {
+  const raw = document.getElementById('bulkIngredientsInput').value;
+  if(!raw.trim()) return;
+  const items = raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+  items.forEach((text, i) => {
+    shoppingList.push({ id: Date.now() + '-' + i + '-' + Math.random().toString(36).slice(2,7), text, done: false });
+  });
+  renderShoppingList();
+  pushShoppingList();
+  document.getElementById('bulkIngredientsInput').value = '';
 });
 
 setInterval(fetchMealPlan, 15 * 1000);
