@@ -72,7 +72,28 @@
   }
   .rail-btn svg{ width:18px; height:18px; }
   .rail-btn.active{ background:#2E2B27; color:#fff; }
+
+  /* Colored icon groups: calendar (today/week/month), chores, and the
+     weather/meals/list group — each gets its own pastel background with a
+     white icon. Active state shows as a ring rather than replacing the color. */
+  .rail-btn.grp-a{ background:var(--c-sophie); color:#fff; }
+  .rail-btn.grp-b{ background:var(--c-kids); color:#fff; }
+  .rail-btn.grp-c{ background:var(--c-shared); color:#fff; }
+  .rail-btn.grp-d{ background:var(--c-rose); color:#fff; }
+  .rail-btn.grp-e{ background:var(--c-green); color:#fff; }
+  .rail-btn.grp-a.active, .rail-btn.grp-b.active, .rail-btn.grp-c.active,
+  .rail-btn.grp-d.active, .rail-btn.grp-e.active{
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--ink);
+  }
+
   .rail-spacer{ flex:1; }
+  .rail-divider{
+    width:26px;
+    height:1px;
+    background:var(--line);
+    margin:8px 0;
+    flex-shrink:0;
+  }
 
   /* ---------- main column ---------- */
   .main{ flex:1; display:flex; flex-direction:column; min-width:0; padding:18px 24px 14px; }
@@ -1174,26 +1195,38 @@
 
 <div class="app">
   <aside class="rail">
-    <div class="rail-btn" id="btnToday" title="Jump to today">
+    <div class="rail-btn grp-d" id="btnToday" title="Jump to today">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/></svg>
     </div>
-    <div class="rail-btn active" id="railWeek" title="Week view">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 4v-1M16 4v-1"/></svg>
+
+    <div class="rail-divider"></div>
+
+    <div class="rail-btn grp-a active" id="railWeek" title="Week view">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M12 4v16M17 4v16"/></svg>
     </div>
-    <div class="rail-btn" id="railMonth" title="Month view">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18"/><path d="M9 14h.01M13 14h.01M17 14h.01M9 17h.01M13 17h.01"/></svg>
+    <div class="rail-btn grp-a" id="railMonth" title="Month view">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18"/><path d="M9 4v16M15 4v16"/></svg>
     </div>
-    <div class="rail-btn" id="railList" title="Shopping list">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M16 3v3a1 1 0 0 0 1 1h3"/><path d="M8 11h8M8 15h8M8 19h5"/></svg>
-    </div>
-    <div class="rail-btn" id="railChores" title="Chores">
+
+    <div class="rail-divider"></div>
+
+    <div class="rail-btn grp-b" id="railChores" title="Chores">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V3Z"/><path d="m8.5 12 1.5 1.5L13 10.5"/><path d="m8.5 17 1.5 1.5L13 15.5"/></svg>
     </div>
-    <div class="rail-btn" id="railWeather" title="Weather">
+
+    <div class="rail-divider"></div>
+
+    <div class="rail-btn grp-c" id="railWeather" title="Weather">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.8A4 4 0 0 0 6.5 19h11Z"/><path d="M12 3v1M4.2 5.2l.7.7M19.8 5.2l-.7.7"/></svg>
     </div>
-    <div class="rail-btn" id="railMeals" title="Meals">
+
+    <div class="rail-divider"></div>
+
+    <div class="rail-btn grp-e" id="railMeals" title="Meals">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3v6a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3"/><path d="M9 11v10"/><path d="M16 3c-1.5 0-2.5 1.5-2.5 4s1 4 2.5 4v10"/></svg>
+    </div>
+    <div class="rail-btn grp-e" id="railList" title="Shopping list">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M16 3v3a1 1 0 0 0 1 1h3"/><path d="M8 11h8M8 15h8M8 19h5"/></svg>
     </div>
     <div class="rail-spacer"></div>
     <div class="rail-btn" id="railSettings" title="Settings">
