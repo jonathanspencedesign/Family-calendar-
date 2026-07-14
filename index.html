@@ -1912,12 +1912,17 @@ document.getElementById('monthPrev').onclick = ()=>{ monthOffset--; renderMonth(
 document.getElementById('monthNext').onclick = ()=>{ monthOffset++; renderMonth(); };
 
 // ---------- shopping list ----------
-// Persisted with localStorage — this is a real page (GitHub Pages / the tablet's
-// browser), not a sandboxed preview, so localStorage works normally here and
-// keeps the list intact between reloads on this tablet.
+// Shared across devices via the Worker's /list endpoint (Cloudflare KV).
+// localStorage is kept as an instant-render cache and an offline fallback.
 const LIST_STORAGE_KEY = 'family-shopping-list-v1';
 
-function loadShoppingList(){
+function shoppingListEndpoint(){
+  if(!appSettings.calendarFeedUrl) return null;
+  try{ return new URL('/list', appSettings.calendarFeedUrl).toString(); }
+  catch(e){ return null; }
+}
+
+function loadShoppingListCache(){
   try{
     const raw = localStorage.getItem(LIST_STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -1926,11 +1931,42 @@ function loadShoppingList(){
   }
 }
 
-function saveShoppingList(){
+function cacheShoppingListLocally(){
   try{ localStorage.setItem(LIST_STORAGE_KEY, JSON.stringify(shoppingList)); } catch(e){}
 }
 
-let shoppingList = loadShoppingList();
+let shoppingList = loadShoppingListCache(); // shows something instantly, then gets refreshed from the server
+
+async function fetchShoppingList(){
+  const endpoint = shoppingListEndpoint();
+  if(!endpoint) return;
+  try{
+    const res = await fetch(endpoint);
+    if(!res.ok) throw new Error('list fetch failed: ' + res.status);
+    const data = await res.json();
+    shoppingList = Array.isArray(data.items) ? data.items : [];
+    cacheShoppingListLocally();
+    if(currentView === 'list') renderShoppingList();
+  } catch(err){
+    console.error('Shopping list sync error:', err);
+    // keep showing the local cache if the server's unreachable
+  }
+}
+
+async function pushShoppingList(){
+  cacheShoppingListLocally();
+  const endpoint = shoppingListEndpoint();
+  if(!endpoint) return;
+  try{
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: shoppingList }),
+    });
+  } catch(err){
+    console.error('Shopping list save error:', err);
+  }
+}
 
 function renderShoppingList(){
   const container = document.getElementById('listItems');
@@ -1973,19 +2009,19 @@ function addShoppingItem(text){
   const trimmed = text.trim();
   if(!trimmed) return;
   shoppingList.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), text: trimmed, done: false });
-  saveShoppingList();
   renderShoppingList();
+  pushShoppingList();
 }
 
 function toggleShoppingItem(id){
   const item = shoppingList.find(i => i.id === id);
-  if(item){ item.done = !item.done; saveShoppingList(); renderShoppingList(); }
+  if(item){ item.done = !item.done; renderShoppingList(); pushShoppingList(); }
 }
 
 function deleteShoppingItem(id){
   shoppingList = shoppingList.filter(i => i.id !== id);
-  saveShoppingList();
   renderShoppingList();
+  pushShoppingList();
 }
 
 document.getElementById('listAddBtn').addEventListener('click', () => {
@@ -2000,6 +2036,10 @@ document.getElementById('listInput').addEventListener('keydown', (e) => {
     e.target.value = '';
   }
 });
+
+// Poll for changes made from other devices (e.g. a phone) every 15s.
+setInterval(fetchShoppingList, 15 * 1000);
+fetchShoppingList();
 
 // ---------- chores (Charlotte / Sophie) ----------
 const CHORES_STORAGE_KEY = 'family-chores-v1';
@@ -2387,6 +2427,7 @@ document.getElementById('feedUrlSaveBtn').addEventListener('click', () => {
   appSettings.calendarFeedUrl = document.getElementById('feedUrlInput').value.trim();
   saveSettings();
   refreshAll();
+  fetchShoppingList();
 });
 
 async function geocodeLocation(query){
@@ -2426,13 +2467,14 @@ document.getElementById('refreshNowBtn').addEventListener('click', async () => {
   btn.textContent = 'Refreshing…';
   await refreshAll();
   await loadWeather();
+  await fetchShoppingList();
   btn.textContent = original;
 });
 
 document.getElementById('clearShoppingBtn').addEventListener('click', () => {
   shoppingList = [];
-  saveShoppingList();
   renderShoppingList();
+  pushShoppingList();
 });
 
 document.getElementById('clearChoresBtn').addEventListener('click', () => {

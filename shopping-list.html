@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopping List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FAF8F5;
+    --panel: #FFFFFF;
+    --line: #ECE7DF;
+    --ink: #2E2B27;
+    --ink-mid: #8B857C;
+    --accent: #7FCFC1;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html, body{
+    width:100%; min-height:100%;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap{
+    max-width:520px;
+    margin:0 auto;
+    padding:20px 16px 100px;
+  }
+  h1{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:24px;
+    margin-bottom:4px;
+  }
+  .subtitle{
+    font-size:13px;
+    color:var(--ink-mid);
+    margin-bottom:18px;
+  }
+  .add-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    padding:6px 0 10px;
+    z-index:5;
+  }
+  .add-row input{
+    flex:1;
+    padding:13px 16px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    font-family:'Inter', sans-serif;
+    font-size:16px;
+    color:var(--ink);
+  }
+  .add-row input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .add-row button{
+    padding:0 20px;
+    border-radius:12px;
+    border:none;
+    background:var(--ink);
+    color:#fff;
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+  }
+  .add-row button:active{ opacity:0.85; }
+
+  .list-item{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:15px 16px;
+    margin-bottom:9px;
+  }
+  .list-item.done{ background:#FAF9F7; }
+
+  .checkbox{
+    width:28px; height:28px;
+    border-radius:50%;
+    border:2px solid var(--ink-mid);
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+  }
+  .checkbox.checked{ background:var(--accent); border-color:var(--accent); }
+
+  .item-text{ flex:1; font-size:16px; word-break:break-word; }
+  .list-item.done .item-text{ text-decoration:line-through; color:var(--ink-mid); }
+
+  .delete-btn{
+    color:var(--ink-mid);
+    font-size:20px;
+    padding:4px 6px;
+    flex-shrink:0;
+  }
+
+  .empty-state{
+    text-align:center;
+    color:var(--ink-mid);
+    font-size:14px;
+    padding:50px 0;
+  }
+
+  .status-row{
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-mid);
+    margin-top:18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>🛒 Shopping List</h1>
+  <div class="subtitle">Shared with the family — changes sync automatically</div>
+
+  <div class="add-row">
+    <input type="text" id="itemInput" placeholder="Add an item…" autocomplete="off">
+    <button id="addBtn">Add</button>
+  </div>
+
+  <div id="items"></div>
+
+  <div class="status-row" id="statusRow">—</div>
+</div>
+
+<script>
+// Point this at your Worker's URL (same one the dashboard uses).
+const WORKER_URL = 'https://family-calendar.jonathanspencedesign.workers.dev/';
+const LIST_ENDPOINT = new URL('/list', WORKER_URL).toString();
+const CACHE_KEY = 'family-shopping-list-v1'; // same key the tablet dashboard uses, for a consistent local fallback
+
+let items = loadCache();
+let lastSynced = null;
+
+function loadCache(){
+  try{
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){ return []; }
+}
+
+function saveCache(){
+  try{ localStorage.setItem(CACHE_KEY, JSON.stringify(items)); } catch(e){}
+}
+
+function render(){
+  const container = document.getElementById('items');
+  container.innerHTML = '';
+
+  if(items.length === 0){
+    container.innerHTML = '<div class="empty-state">List\'s empty — add something above.</div>';
+    return;
+  }
+
+  const sorted = [...items].sort((a,b) => (a.done === b.done) ? 0 : (a.done ? 1 : -1));
+  sorted.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'list-item' + (item.done ? ' done' : '');
+
+    const box = document.createElement('div');
+    box.className = 'checkbox' + (item.done ? ' checked' : '');
+    box.textContent = item.done ? '✓' : '';
+    box.addEventListener('click', () => toggleItem(item.id));
+
+    const text = document.createElement('div');
+    text.className = 'item-text';
+    text.textContent = item.text;
+
+    const del = document.createElement('div');
+    del.className = 'delete-btn';
+    del.textContent = '✕';
+    del.addEventListener('click', () => deleteItem(item.id));
+
+    row.appendChild(box);
+    row.appendChild(text);
+    row.appendChild(del);
+    container.appendChild(row);
+  });
+}
+
+function updateStatus(text){
+  document.getElementById('statusRow').textContent = text;
+}
+
+async function fetchList(){
+  try{
+    const res = await fetch(LIST_ENDPOINT, { cache: 'no-store' });
+    if(!res.ok) throw new Error('fetch failed: ' + res.status);
+    const data = await res.json();
+    items = Array.isArray(data.items) ? data.items : [];
+    saveCache();
+    render();
+    lastSynced = new Date();
+    updateStatus('Synced just now');
+  } catch(err){
+    console.error(err);
+    updateStatus('Offline — showing last saved list');
+  }
+}
+
+async function pushList(){
+  saveCache();
+  try{
+    await fetch(LIST_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items }),
+    });
+    lastSynced = new Date();
+    updateStatus('Synced just now');
+  } catch(err){
+    console.error(err);
+    updateStatus('Saved on this phone — will sync when back online');
+  }
+}
+
+function addItem(text){
+  const trimmed = text.trim();
+  if(!trimmed) return;
+  items.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), text: trimmed, done: false });
+  render();
+  pushList();
+}
+
+function toggleItem(id){
+  const item = items.find(i => i.id === id);
+  if(item){ item.done = !item.done; render(); pushList(); }
+}
+
+function deleteItem(id){
+  items = items.filter(i => i.id !== id);
+  render();
+  pushList();
+}
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  const input = document.getElementById('itemInput');
+  addItem(input.value);
+  input.value = '';
+  input.focus();
+});
+document.getElementById('itemInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    addItem(e.target.value);
+    e.target.value = '';
+  }
+});
+
+// Refresh from the server periodically, and whenever the page becomes visible
+// again (e.g. switching back to this tab/app on the phone).
+render();
+fetchList();
+setInterval(fetchList, 15 * 1000);
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') fetchList();
+});
+</script>
+
+</body>
+</html>
