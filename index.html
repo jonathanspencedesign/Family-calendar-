@@ -2718,6 +2718,7 @@ document.getElementById('btnToday').onclick = ()=>{
   const sw = document.getElementById('weekScroll');
   if(sw) sw.dataset.scrolled = 'false';
   monthOffset = 0;
+  setView('month');
   refreshAll();
 };
 
