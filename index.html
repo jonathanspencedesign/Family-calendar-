@@ -731,6 +731,20 @@
     white-space:nowrap;
   }
 
+  #pastePlanInput{
+    width:100%;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    color:var(--ink);
+    resize:vertical;
+    -webkit-user-select:text;
+    user-select:text;
+  }
+
   .settings-person-controls{
     display:flex;
     flex-direction:column;
@@ -1053,50 +1067,6 @@
   }
   .meals-scroll::-webkit-scrollbar{ width:5px; }
   .meals-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
-
-  .paste-plan-card{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:16px 18px;
-    margin-bottom:18px;
-  }
-  .paste-plan-title{
-    font-family:'Quicksand', sans-serif;
-    font-weight:700;
-    font-size:15px;
-    margin-bottom:4px;
-  }
-  .paste-plan-sub{
-    font-size:12px;
-    color:var(--ink-mid);
-    margin-bottom:10px;
-  }
-  .paste-plan-card textarea{
-    width:100%;
-    padding:10px 12px;
-    border-radius:10px;
-    border:1px solid var(--line);
-    background:var(--bg);
-    font-family:'Inter', sans-serif;
-    font-size:13.5px;
-    color:var(--ink);
-    resize:vertical;
-    -webkit-user-select:text;
-    user-select:text;
-    margin-bottom:10px;
-  }
-  .paste-plan-card button{
-    padding:9px 20px;
-    border-radius:10px;
-    border:none;
-    background:var(--ink);
-    color:#fff;
-    font-family:'Quicksand', sans-serif;
-    font-weight:700;
-    font-size:14px;
-    cursor:pointer;
-  }
 
   .meal-day-list{ display:flex; flex-direction:column; gap:8px; }
   .meal-day-row{
@@ -1457,6 +1427,16 @@
             </div>
           </div>
 
+          <div class="settings-section-title">Meal plan</div>
+          <div class="settings-row settings-row-stacked">
+            <div class="settings-label">
+              <div class="settings-title">Paste this week's plan</div>
+              <div class="settings-sub">One line per day, e.g. "Monday: Spaghetti bolognese" — paste what Claude gives you and hit Save</div>
+            </div>
+            <textarea id="pastePlanInput" rows="4" placeholder="Monday: Spaghetti bolognese&#10;Tuesday: Tacos&#10;..."></textarea>
+            <button id="pastePlanSaveBtn" class="settings-action-btn">Save plan</button>
+          </div>
+
           <div class="settings-section-title">Data</div>
           <div class="settings-row">
             <div class="settings-label">
@@ -1522,13 +1502,6 @@
       </div>
 
       <div class="meals-scroll" id="mealsScroll">
-
-        <div class="paste-plan-card">
-          <div class="paste-plan-title">Paste this week's plan</div>
-          <div class="paste-plan-sub">One line per day, e.g. "Monday: Spaghetti bolognese" — paste what Claude gives you and hit Save</div>
-          <textarea id="pastePlanInput" rows="4" placeholder="Monday: Spaghetti bolognese&#10;Tuesday: Tacos&#10;..."></textarea>
-          <button id="pastePlanSaveBtn">Save plan</button>
-        </div>
 
         <div class="meal-day-list" id="mealDayList"></div>
 
@@ -2526,6 +2499,7 @@ document.getElementById('mealsNext').addEventListener('click', () => { mealsWeek
 document.getElementById('pastePlanSaveBtn').addEventListener('click', () => {
   const raw = document.getElementById('pastePlanInput').value;
   if(!raw.trim()) return;
+  mealsWeekOffset = 0; // pasting from Settings always targets the current week
   const dates = mealsWeekDates();
   const WEEKDAY_NAMES = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
@@ -2544,7 +2518,7 @@ document.getElementById('pastePlanSaveBtn').addEventListener('click', () => {
   });
 
   pushMealPlan();
-  renderMealsView();
+  if(currentView === 'meals') renderMealsView();
   document.getElementById('pastePlanInput').value = '';
 });
 
