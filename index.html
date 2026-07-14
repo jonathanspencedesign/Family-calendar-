@@ -491,11 +491,38 @@
     min-height:0;
   }
   .chore-card-header{
-    padding:14px 18px;
+    padding:24px 18px 20px;
+    text-align:center;
+  }
+  .chore-header-name{
     font-family:'Quicksand', sans-serif;
     font-weight:700;
-    font-size:18px;
+    font-size:24px;
     color:#fff;
+  }
+  .chore-header-stars-label{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:rgba(255,255,255,0.85);
+    margin-top:12px;
+  }
+  .chore-header-stars-count{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:30px;
+    color:#fff;
+    margin-top:4px;
+    transition:transform 0.25s ease;
+  }
+  .chore-header-stars-count.pulse{
+    animation: starPulse 0.5s ease;
+  }
+  @keyframes starPulse{
+    0%{ transform:scale(1); }
+    35%{ transform:scale(1.35); }
+    100%{ transform:scale(1); }
   }
   .chore-input-row{
     display:flex;
@@ -1292,7 +1319,11 @@
     <div class="view" id="choresView" hidden>
       <div class="chores-grid">
         <div class="chore-card" data-child="charlotte">
-          <div class="chore-card-header" id="choreHeaderCharlotte"></div>
+          <div class="chore-card-header" id="choreHeaderCharlotte">
+            <div class="chore-header-name" id="choreHeaderNameCharlotte"></div>
+            <div class="chore-header-stars-label">Stars Earned</div>
+            <div class="chore-header-stars-count" id="choreHeaderStarsCharlotte">⭐ 0</div>
+          </div>
           <div class="chore-input-row">
             <input type="text" class="chore-input" placeholder="Add a chore…" autocomplete="off">
             <button class="chore-add-btn">Add</button>
@@ -1300,7 +1331,11 @@
           <div class="chore-items" data-items-for="charlotte"></div>
         </div>
         <div class="chore-card" data-child="sophie">
-          <div class="chore-card-header" id="choreHeaderSophie"></div>
+          <div class="chore-card-header" id="choreHeaderSophie">
+            <div class="chore-header-name" id="choreHeaderNameSophie"></div>
+            <div class="chore-header-stars-label">Stars Earned</div>
+            <div class="chore-header-stars-count" id="choreHeaderStarsSophie">⭐ 0</div>
+          </div>
           <div class="chore-input-row">
             <input type="text" class="chore-input" placeholder="Add a chore…" autocomplete="off">
             <button class="chore-add-btn">Add</button>
@@ -1496,9 +1531,23 @@
           <div class="settings-row">
             <div class="settings-label">
               <div class="settings-title">Clear chores</div>
-              <div class="settings-sub">Removes every chore for both Charlotte and Sophie</div>
+              <div class="settings-sub">Removes every chore for both Charlotte and Sophie (stars earned are kept)</div>
             </div>
             <button class="settings-action-btn danger" id="clearChoresBtn">Clear</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Reset Charlotte's stars</div>
+              <div class="settings-sub">Use this once a reward's been redeemed</div>
+            </div>
+            <button class="settings-action-btn danger" id="resetStarsCharlotteBtn">Reset</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Reset Sophie's stars</div>
+              <div class="settings-sub">Use this once a reward's been redeemed</div>
+            </div>
+            <button class="settings-action-btn danger" id="resetStarsSophieBtn">Reset</button>
           </div>
           <div class="settings-row">
             <div class="settings-label">
@@ -2595,19 +2644,39 @@ function renderChoreHeaders(){
   ['charlotte','sophie'].forEach(child => {
     const cfg = appSettings.kids[child];
     const pal = COLOR_PALETTE[cfg.colorKey] || COLOR_PALETTE.purple;
-    const header = document.getElementById('choreHeader' + child.charAt(0).toUpperCase() + child.slice(1));
-    header.textContent = (cfg.emoji ? cfg.emoji + ' ' : '') + cfg.name;
-    header.style.background = pal.color;
+    const cap = child.charAt(0).toUpperCase() + child.slice(1);
+    document.getElementById('choreHeader' + cap).style.background = pal.color;
+    document.getElementById('choreHeaderName' + cap).textContent = (cfg.emoji ? cfg.emoji + ' ' : '') + cfg.name;
+    document.getElementById('choreHeaderStars' + cap).textContent = '⭐ ' + (chores[child].stars || 0);
   });
 }
 
 function loadChores(){
+  let parsed = null;
   try{
     const raw = localStorage.getItem(CHORES_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { charlotte: [], sophie: [] };
+    parsed = raw ? JSON.parse(raw) : null;
   } catch(e){
-    return { charlotte: [], sophie: [] };
+    parsed = null;
   }
+
+  const result = {};
+  ['charlotte','sophie'].forEach(child => {
+    const existing = parsed && parsed[child];
+    if(Array.isArray(existing)){
+      // Migrating from the old flat-array format. Already-done items are marked
+      // as already having earned their star, so re-ticking them later doesn't
+      // grant a duplicate — but we don't retroactively add to the star count,
+      // to avoid a surprise jump in numbers on first load of this update.
+      const items = existing.map(item => ({ ...item, starAwarded: !!item.done }));
+      result[child] = { items, stars: 0 };
+    } else if(existing && typeof existing === 'object' && Array.isArray(existing.items)){
+      result[child] = { items: existing.items, stars: existing.stars || 0 };
+    } else {
+      result[child] = { items: [], stars: 0 };
+    }
+  });
+  return result;
 }
 
 function saveChores(){
@@ -2616,12 +2685,22 @@ function saveChores(){
 
 let chores = loadChores();
 
+function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function bumpStarDisplay(child){
+  const el = document.getElementById('choreHeaderStars' + capitalize(child));
+  el.textContent = '⭐ ' + (chores[child].stars || 0);
+  el.classList.remove('pulse');
+  void el.offsetWidth; // restart the animation even if it just played
+  el.classList.add('pulse');
+}
+
 function renderChores(){
   renderChoreHeaders();
   ['charlotte','sophie'].forEach(child => {
     const container = document.querySelector('.chore-items[data-items-for="'+child+'"]');
     container.innerHTML = '';
-    const list = chores[child] || [];
+    const list = chores[child].items;
 
     if(list.length === 0){
       container.innerHTML = '<div class="chore-empty">No chores yet.</div>';
@@ -2661,19 +2740,28 @@ function renderChores(){
 function addChoreItem(child, text){
   const trimmed = text.trim();
   if(!trimmed) return;
-  chores[child] = chores[child] || [];
-  chores[child].push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), text: trimmed, done: false });
+  chores[child].items.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), text: trimmed, done: false, starAwarded: false });
   saveChores();
   renderChores();
 }
 
 function toggleChoreItem(child, id){
-  const item = (chores[child] || []).find(i => i.id === id);
-  if(item){ item.done = !item.done; saveChores(); renderChores(); }
+  const item = chores[child].items.find(i => i.id === id);
+  if(!item) return;
+  item.done = !item.done;
+  let awardedStar = false;
+  if(item.done && !item.starAwarded){
+    item.starAwarded = true;
+    chores[child].stars = (chores[child].stars || 0) + 1;
+    awardedStar = true;
+  }
+  saveChores();
+  renderChores();
+  if(awardedStar) bumpStarDisplay(child);
 }
 
 function deleteChoreItem(child, id){
-  chores[child] = (chores[child] || []).filter(i => i.id !== id);
+  chores[child].items = chores[child].items.filter(i => i.id !== id);
   saveChores();
   renderChores();
 }
@@ -3022,7 +3110,22 @@ document.getElementById('clearShoppingBtn').addEventListener('click', () => {
 });
 
 document.getElementById('clearChoresBtn').addEventListener('click', () => {
-  chores = { charlotte: [], sophie: [] };
+  chores.charlotte.items = [];
+  chores.sophie.items = [];
+  saveChores();
+  renderChores();
+});
+
+document.getElementById('resetStarsCharlotteBtn').addEventListener('click', () => {
+  chores.charlotte.stars = 0;
+  chores.charlotte.items.forEach(i => i.starAwarded = false);
+  saveChores();
+  renderChores();
+});
+
+document.getElementById('resetStarsSophieBtn').addEventListener('click', () => {
+  chores.sophie.stars = 0;
+  chores.sophie.items.forEach(i => i.starAwarded = false);
   saveChores();
   renderChores();
 });
