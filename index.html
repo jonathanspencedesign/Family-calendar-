@@ -1036,6 +1036,148 @@
   .daily-row .d-temps{ font-family:'IBM Plex Mono', monospace; font-size:13.5px; width:80px; text-align:right; flex-shrink:0; }
   .daily-row .d-temps .lo{ color:var(--ink-mid); }
 
+  /* ---------- meals tab ---------- */
+  .meals-nav{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    padding-bottom:14px;
+  }
+
+  .meals-scroll{
+    flex:1;
+    overflow-y:auto;
+    min-height:0;
+    -webkit-overflow-scrolling:touch;
+  }
+  .meals-scroll::-webkit-scrollbar{ width:5px; }
+  .meals-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+
+  .paste-plan-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 18px;
+    margin-bottom:18px;
+  }
+  .paste-plan-title{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    margin-bottom:4px;
+  }
+  .paste-plan-sub{
+    font-size:12px;
+    color:var(--ink-mid);
+    margin-bottom:10px;
+  }
+  .paste-plan-card textarea{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    color:var(--ink);
+    resize:vertical;
+    -webkit-user-select:text;
+    user-select:text;
+    margin-bottom:10px;
+  }
+  .paste-plan-card button{
+    padding:9px 20px;
+    border-radius:10px;
+    border:none;
+    background:var(--ink);
+    color:#fff;
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+  }
+
+  .meal-day-list{ display:flex; flex-direction:column; gap:8px; }
+  .meal-day-row{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 16px;
+  }
+  .meal-day-row.today{ background:#FFF7EC; border-color:#F0DDB8; }
+  .meal-day-main{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .meal-day-label{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    width:70px;
+    flex-shrink:0;
+    color:var(--ink-mid);
+  }
+  .meal-day-row.today .meal-day-label{ color:var(--ink); }
+  .meal-text-input{
+    flex:1;
+    padding:9px 12px;
+    border-radius:9px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    -webkit-user-select:text;
+    user-select:text;
+  }
+  .add-ingredients-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-mid);
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:6px 10px;
+    cursor:pointer;
+    flex-shrink:0;
+    white-space:nowrap;
+  }
+  .ingredients-box{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid var(--line);
+    display:flex;
+    gap:8px;
+  }
+  .ingredients-box[hidden]{ display:none; }
+  .ingredients-box textarea{
+    flex:1;
+    padding:9px 12px;
+    border-radius:9px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    color:var(--ink);
+    resize:vertical;
+    -webkit-user-select:text;
+    user-select:text;
+  }
+  .ingredients-box button{
+    padding:0 16px;
+    border-radius:9px;
+    border:none;
+    background:var(--c-mum);
+    color:var(--c-mum-ink);
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+
   .popup-card.wide{ max-width:640px; }
   .forecast-row{
     display:flex;
@@ -1080,6 +1222,9 @@
     <div class="rail-btn" id="railWeather" title="Weather">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.8A4 4 0 0 0 6.5 19h11Z"/><path d="M12 3v1M4.2 5.2l.7.7M19.8 5.2l-.7.7"/></svg>
     </div>
+    <div class="rail-btn" id="railMeals" title="Meals">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3v6a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3"/><path d="M9 11v10"/><path d="M16 3c-1.5 0-2.5 1.5-2.5 4s1 4 2.5 4v10"/></svg>
+    </div>
     <div class="rail-spacer"></div>
     <div class="rail-btn" id="railSettings" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1105,6 +1250,7 @@
           <button id="toggleList">List</button>
           <button id="toggleChores">Chores</button>
           <button id="toggleWeather">Weather</button>
+          <button id="toggleMeals">Meals</button>
         </div>
       </div>
     </div>
@@ -1364,6 +1510,27 @@
 
         <div class="weather-section-title">10-day forecast</div>
         <div class="daily-list" id="dailyList"></div>
+
+      </div>
+    </div>
+
+    <div class="view" id="mealsView" hidden>
+      <div class="meals-nav">
+        <button class="month-nav-btn" id="mealsPrev" aria-label="Previous week">‹</button>
+        <div class="month-nav-label" id="mealsNavLabel">Week of —</div>
+        <button class="month-nav-btn" id="mealsNext" aria-label="Next week">›</button>
+      </div>
+
+      <div class="meals-scroll" id="mealsScroll">
+
+        <div class="paste-plan-card">
+          <div class="paste-plan-title">Paste this week's plan</div>
+          <div class="paste-plan-sub">One line per day, e.g. "Monday: Spaghetti bolognese" — paste what Claude gives you and hit Save</div>
+          <textarea id="pastePlanInput" rows="4" placeholder="Monday: Spaghetti bolognese&#10;Tuesday: Tacos&#10;..."></textarea>
+          <button id="pastePlanSaveBtn">Save plan</button>
+        </div>
+
+        <div class="meal-day-list" id="mealDayList"></div>
 
       </div>
     </div>
@@ -2067,21 +2234,25 @@ function setView(view){
   document.getElementById('choresView').hidden = view !== 'chores';
   document.getElementById('settingsView').hidden = view !== 'settings';
   document.getElementById('weatherView').hidden = view !== 'weather';
+  document.getElementById('mealsView').hidden = view !== 'meals';
   document.getElementById('toggleWeek').classList.toggle('active', view==='week');
   document.getElementById('toggleMonth').classList.toggle('active', view==='month');
   document.getElementById('toggleList').classList.toggle('active', view==='list');
   document.getElementById('toggleChores').classList.toggle('active', view==='chores');
   document.getElementById('toggleWeather').classList.toggle('active', view==='weather');
+  document.getElementById('toggleMeals').classList.toggle('active', view==='meals');
   document.getElementById('railWeek').classList.toggle('active', view==='week');
   document.getElementById('railMonth').classList.toggle('active', view==='month');
   document.getElementById('railList').classList.toggle('active', view==='list');
   document.getElementById('railChores').classList.toggle('active', view==='chores');
   document.getElementById('railSettings').classList.toggle('active', view==='settings');
   document.getElementById('railWeather').classList.toggle('active', view==='weather');
-  document.getElementById('peopleRow').style.display = (view==='list' || view==='chores' || view==='settings' || view==='weather') ? 'none' : 'flex';
+  document.getElementById('railMeals').classList.toggle('active', view==='meals');
+  document.getElementById('peopleRow').style.display = (view==='list' || view==='chores' || view==='settings' || view==='weather' || view==='meals') ? 'none' : 'flex';
   if(view === 'list') renderShoppingList();
   if(view === 'chores') renderChores();
   if(view === 'settings') renderSettingsView();
+  if(view === 'meals') renderMealsView();
   if(view === 'weather') renderWeatherTab();
   updatePeopleRow();
 }
@@ -2091,11 +2262,13 @@ document.getElementById('toggleMonth').onclick = ()=>setView('month');
 document.getElementById('toggleList').onclick = ()=>setView('list');
 document.getElementById('toggleChores').onclick = ()=>setView('chores');
 document.getElementById('toggleWeather').onclick = ()=>setView('weather');
+document.getElementById('toggleMeals').onclick = ()=>setView('meals');
 document.getElementById('railWeek').onclick = ()=>setView('week');
 document.getElementById('railMonth').onclick = ()=>setView('month');
 document.getElementById('railList').onclick = ()=>setView('list');
 document.getElementById('railChores').onclick = ()=>setView('chores');
 document.getElementById('railWeather').onclick = ()=>setView('weather');
+document.getElementById('railMeals').onclick = ()=>setView('meals');
 document.getElementById('railSettings').onclick = ()=>requestSettingsAccess();
 document.getElementById('monthPrev').onclick = ()=>{ monthOffset--; renderMonth(); };
 document.getElementById('monthNext').onclick = ()=>{ monthOffset++; renderMonth(); };
@@ -2229,6 +2402,154 @@ document.getElementById('listInput').addEventListener('keydown', (e) => {
 // Poll for changes made from other devices (e.g. a phone) every 15s.
 setInterval(fetchShoppingList, 15 * 1000);
 fetchShoppingList();
+
+// ---------- meal plan ----------
+// Shared across devices via the Worker's /meals endpoint (Cloudflare KV), same
+// pattern as the shopping list. Keyed by ISO date (YYYY-MM-DD) -> meal text.
+let mealPlan = {};
+let mealsWeekOffset = 0; // 0 = current week, +1 = next, -1 = previous
+
+function mealsEndpoint(){
+  if(!appSettings.calendarFeedUrl) return null;
+  try{ return new URL('/meals', appSettings.calendarFeedUrl).toString(); }
+  catch(e){ return null; }
+}
+
+async function fetchMealPlan(){
+  const endpoint = mealsEndpoint();
+  if(!endpoint) return;
+  try{
+    const res = await fetch(endpoint);
+    if(!res.ok) throw new Error('meals fetch failed: ' + res.status);
+    const data = await res.json();
+    mealPlan = (data && typeof data.meals === 'object' && data.meals) ? data.meals : {};
+    if(currentView === 'meals') renderMealsView();
+  } catch(err){
+    console.error('Meal plan sync error:', err);
+  }
+}
+
+async function pushMealPlan(){
+  const endpoint = mealsEndpoint();
+  if(!endpoint) return;
+  try{
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ meals: mealPlan }),
+    });
+  } catch(err){
+    console.error('Meal plan save error:', err);
+  }
+}
+
+function mealsWeekDates(){
+  const weekStart = getWeekStart(new Date());
+  weekStart.setDate(weekStart.getDate() + mealsWeekOffset * 7);
+  return [...Array(7)].map((_,i) => { const d = new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
+}
+
+function renderMealsView(){
+  const dates = mealsWeekDates();
+  const todayStr = new Date().toDateString();
+
+  const firstLabel = dates[0].toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  const lastLabel = dates[6].toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  document.getElementById('mealsNavLabel').textContent = 'Week of ' + firstLabel + ' – ' + lastLabel;
+
+  const list = document.getElementById('mealDayList');
+  list.innerHTML = '';
+
+  dates.forEach(d => {
+    const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+    const isToday = d.toDateString() === todayStr;
+    const dayName = d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
+
+    const row = document.createElement('div');
+    row.className = 'meal-day-row' + (isToday ? ' today' : '');
+
+    const main = document.createElement('div');
+    main.className = 'meal-day-main';
+
+    const label = document.createElement('div');
+    label.className = 'meal-day-label';
+    label.textContent = dayName + ' ' + d.getDate();
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'meal-text-input';
+    input.placeholder = 'Nothing planned';
+    input.value = mealPlan[key] || '';
+    input.addEventListener('change', () => {
+      mealPlan[key] = input.value;
+      pushMealPlan();
+    });
+
+    const ingBtn = document.createElement('button');
+    ingBtn.className = 'add-ingredients-btn';
+    ingBtn.textContent = '+ Ingredients';
+    ingBtn.addEventListener('click', () => {
+      box.hidden = !box.hidden;
+    });
+
+    main.appendChild(label);
+    main.appendChild(input);
+    main.appendChild(ingBtn);
+
+    const box = document.createElement('div');
+    box.className = 'ingredients-box';
+    box.hidden = true;
+    const textarea = document.createElement('textarea');
+    textarea.rows = 2;
+    textarea.placeholder = 'mince, pasta, tinned tomatoes…';
+    const addBtn = document.createElement('button');
+    addBtn.textContent = 'Add to list';
+    addBtn.addEventListener('click', () => {
+      const raw = textarea.value;
+      const parts = raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+      parts.forEach(p => addShoppingItem(p));
+      textarea.value = '';
+      box.hidden = true;
+    });
+    box.appendChild(textarea);
+    box.appendChild(addBtn);
+
+    row.appendChild(main);
+    row.appendChild(box);
+    list.appendChild(row);
+  });
+}
+
+document.getElementById('mealsPrev').addEventListener('click', () => { mealsWeekOffset--; renderMealsView(); });
+document.getElementById('mealsNext').addEventListener('click', () => { mealsWeekOffset++; renderMealsView(); });
+
+document.getElementById('pastePlanSaveBtn').addEventListener('click', () => {
+  const raw = document.getElementById('pastePlanInput').value;
+  if(!raw.trim()) return;
+  const dates = mealsWeekDates();
+  const WEEKDAY_NAMES = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+
+  raw.split('\n').forEach(line => {
+    const m = line.match(/^\s*([A-Za-z]+)\s*[:\-–]\s*(.+)$/);
+    if(!m) return;
+    const dayWord = m[1].toLowerCase();
+    const meal = m[2].trim();
+    const dayIdx = WEEKDAY_NAMES.findIndex(w => w.startsWith(dayWord) || dayWord.startsWith(w.slice(0,3)));
+    if(dayIdx === -1) return;
+    const match = dates.find(d => d.getDay() === dayIdx);
+    if(match){
+      const key = dateKey(match.getFullYear(), match.getMonth(), match.getDate());
+      mealPlan[key] = meal;
+    }
+  });
+
+  pushMealPlan();
+  renderMealsView();
+  document.getElementById('pastePlanInput').value = '';
+});
+
+setInterval(fetchMealPlan, 15 * 1000);
+fetchMealPlan();
 
 // ---------- chores (Charlotte / Sophie) ----------
 const CHORES_STORAGE_KEY = 'family-chores-v1';
@@ -2617,6 +2938,7 @@ document.getElementById('feedUrlSaveBtn').addEventListener('click', () => {
   saveSettings();
   refreshAll();
   fetchShoppingList();
+  fetchMealPlan();
 });
 
 async function geocodeLocation(query){
@@ -2657,6 +2979,7 @@ document.getElementById('refreshNowBtn').addEventListener('click', async () => {
   await refreshAll();
   await loadWeather();
   await fetchShoppingList();
+  await fetchMealPlan();
   btn.textContent = original;
 });
 
