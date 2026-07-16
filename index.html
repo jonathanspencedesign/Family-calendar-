@@ -81,8 +81,9 @@
   .rail-btn.grp-c{ background:var(--c-shared); color:#fff; }
   .rail-btn.grp-d{ background:var(--c-rose); color:#fff; }
   .rail-btn.grp-e{ background:var(--c-green); color:#fff; }
+  .rail-btn.grp-f{ background:var(--c-pink); color:#fff; }
   .rail-btn.grp-a.active, .rail-btn.grp-b.active, .rail-btn.grp-c.active,
-  .rail-btn.grp-d.active, .rail-btn.grp-e.active{
+  .rail-btn.grp-d.active, .rail-btn.grp-e.active, .rail-btn.grp-f.active{
     box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--ink);
   }
 
@@ -104,27 +105,33 @@
     justify-content:space-between;
     padding-bottom:14px;
   }
-  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand{ display:flex; align-items:baseline; gap:8px; min-width:0; }
   .brand-name{
     font-family:'Quicksand', sans-serif;
     font-weight:700;
     font-size:26px;
+    white-space:nowrap;
+    flex-shrink:0;
   }
   .brand-clock{
     font-family:'IBM Plex Mono', monospace;
     font-size:15px;
     color:var(--ink-mid);
+    white-space:nowrap;
+    flex-shrink:0;
   }
   .brand-weather{
     font-size:14px;
     color:var(--ink-mid);
     display:flex; align-items:center; gap:5px;
     cursor:pointer;
-    padding:4px 10px;
+    padding:4px 8px;
     border-radius:8px;
+    white-space:nowrap;
+    flex-shrink:0;
   }
   .brand-weather:active{ background:var(--line); }
-  .topbar-right{ display:flex; align-items:center; gap:18px; }
+  .topbar-right{ display:flex; align-items:center; gap:14px; flex-shrink:0; }
 
   .view-toggle{
     display:flex;
@@ -141,7 +148,7 @@
     border:none;
     background:transparent;
     color:var(--ink-mid);
-    padding:6px 14px;
+    padding:6px 11px;
     border-radius:8px;
     cursor:pointer;
   }
@@ -616,6 +623,9 @@
     border-radius:10px;
     padding:6px 12px;
     white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
   }
 
   .sync-status{
@@ -623,12 +633,16 @@
     font-size:10.5px;
     color:var(--ink-dim);
     white-space:nowrap;
+    flex-shrink:0;
   }
 
   .weather-tomorrow{
     font-size:12.5px;
     color:var(--ink-mid);
     white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
   }
 
   /* ---------- bin day banner ---------- */
@@ -1216,6 +1230,186 @@
   .forecast-day .ficon{ font-size:22px; margin-bottom:4px; }
   .forecast-day .fhigh{ font-size:13px; font-weight:700; }
   .forecast-day .flow{ font-size:11.5px; color:var(--ink-mid); }
+
+  /* ---------- placement countdown tab ---------- */
+  .placement-scroll{
+    flex:1;
+    overflow-y:auto;
+    min-height:0;
+    -webkit-overflow-scrolling:touch;
+  }
+  .placement-scroll::-webkit-scrollbar{ width:5px; }
+  .placement-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+
+  .placement-hero{
+    position:relative;
+    border-radius:22px;
+    padding:26px 26px 24px;
+    margin-bottom:22px;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 8% 18%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 40%),
+      radial-gradient(circle at 92% 82%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%),
+      linear-gradient(135deg, var(--c-pink) 0%, var(--c-rose) 55%, var(--c-shared) 100%);
+    box-shadow:0 14px 30px rgba(156,63,102,0.18);
+  }
+  .placement-hero-deco{
+    position:absolute;
+    inset:0;
+    font-size:22px;
+    line-height:1;
+    letter-spacing:14px;
+    color:rgba(255,255,255,0.35);
+    white-space:nowrap;
+    overflow:hidden;
+    padding:6px 0 0 4px;
+    pointer-events:none;
+    user-select:none;
+  }
+  .placement-hero-inner{ position:relative; text-align:center; }
+  .placement-eyebrow{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:rgba(255,255,255,0.95);
+    text-shadow:0 1px 2px rgba(0,0,0,0.08);
+  }
+  .placement-title{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:26px;
+    color:#fff;
+    margin-top:4px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.12);
+  }
+  .placement-count-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:14px;
+    margin:18px 0 6px;
+  }
+  .placement-count-num{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:88px;
+    line-height:1;
+    color:#fff;
+    text-shadow:0 4px 10px rgba(0,0,0,0.15);
+    transition:transform 0.25s ease;
+  }
+  .placement-count-num.pulse{ animation: placementPop 0.5s ease; }
+  @keyframes placementPop{
+    0%{ transform:scale(1); }
+    35%{ transform:scale(1.3) rotate(-4deg); }
+    100%{ transform:scale(1) rotate(0); }
+  }
+  .placement-count-label{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:rgba(255,255,255,0.95);
+  }
+  .placement-sub{
+    font-size:14.5px;
+    color:rgba(255,255,255,0.95);
+    margin-top:2px;
+  }
+  .placement-progress-track{
+    height:16px;
+    border-radius:8px;
+    background:rgba(255,255,255,0.35);
+    margin-top:18px;
+    overflow:hidden;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,0.12);
+  }
+  .placement-progress-fill{
+    height:100%;
+    border-radius:8px;
+    background:#fff;
+    transition:width 0.4s ease;
+  }
+  .placement-progress-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:rgba(255,255,255,0.95);
+    margin-top:8px;
+  }
+  .placement-complete-banner{
+    margin-bottom:18px;
+    background:linear-gradient(135deg, var(--c-green) 0%, var(--c-mum) 100%);
+    color:#fff;
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:17px;
+    text-align:center;
+    padding:16px;
+    border-radius:16px;
+    box-shadow:0 10px 24px rgba(46,107,42,0.2);
+  }
+  .placement-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(84px, 1fr));
+    gap:12px;
+    padding-bottom:10px;
+  }
+  .placement-tile{
+    position:relative;
+    aspect-ratio:1;
+    border-radius:18px;
+    background:var(--panel);
+    border:2px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+  }
+  .placement-tile:active{ transform:scale(0.94); }
+  .placement-tile .ptile-num{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:24px;
+    color:var(--ink-mid);
+  }
+  .placement-tile .ptile-shift-label{
+    font-size:9px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-top:2px;
+  }
+  .placement-tile.done{
+    background:var(--c-pink);
+    border-color:var(--c-pink);
+  }
+  .placement-tile.done .ptile-num{
+    color:#fff;
+    text-decoration:line-through;
+    opacity:0.75;
+    font-size:19px;
+  }
+  .placement-tile.done .ptile-shift-label{ color:rgba(255,255,255,0.85); }
+  .placement-tile.done::after{
+    content:'✓';
+    position:absolute;
+    top:6px;
+    right:9px;
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+  }
+  .placement-tile.done.pulse{ animation: placementTilePop 0.4s ease; }
+  @keyframes placementTilePop{
+    0%{ transform:scale(1); }
+    40%{ transform:scale(1.14); }
+    100%{ transform:scale(1); }
+  }
 </style>
 </head>
 <body>
@@ -1255,6 +1449,12 @@
     <div class="rail-btn grp-e" id="railList" title="Shopping list">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M16 3v3a1 1 0 0 0 1 1h3"/><path d="M8 11h8M8 15h8M8 19h5"/></svg>
     </div>
+    <div class="rail-divider"></div>
+
+    <div class="rail-btn grp-f" id="railPlacement" title="Placement countdown">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.2C.6 8.4 2.3 5 5.6 4.4c2-.35 3.7.55 4.9 2.1a.6.6 0 0 0 1 0c1.2-1.55 2.9-2.45 4.9-2.1 3.3.6 5 4 3.6 7.4C19.5 16.4 12 21 12 21Z"/><path d="M4.5 12h3l1.5-3 2 5 1.5-3h4"/></svg>
+    </div>
+
     <div class="rail-spacer"></div>
     <div class="rail-btn" id="railSettings" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1281,6 +1481,7 @@
           <button id="toggleChores">Chores</button>
           <button id="toggleWeather">Weather</button>
           <button id="toggleMeals">Meals</button>
+          <button id="togglePlacement">Placement</button>
         </div>
       </div>
     </div>
@@ -1513,6 +1714,18 @@
             <button id="bulkIngredientsSaveBtn" class="settings-action-btn">Add all to list</button>
           </div>
 
+          <div class="settings-section-title">Placement countdown</div>
+          <div class="settings-row settings-row-stacked">
+            <div class="settings-label">
+              <div class="settings-title">Total shifts for this placement</div>
+              <div class="settings-sub">Changes how many tick-boxes show on the Placement tab. Existing ticks are kept.</div>
+            </div>
+            <div class="settings-inline-form">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" id="placementTotalInput" placeholder="e.g. 22" autocomplete="off">
+              <button id="placementTotalSaveBtn">Save</button>
+            </div>
+          </div>
+
           <div class="settings-section-title">Data</div>
           <div class="settings-row">
             <div class="settings-label">
@@ -1534,6 +1747,13 @@
               <div class="settings-sub">Removes every chore for both Charlotte and Sophie (stars earned are kept)</div>
             </div>
             <button class="settings-action-btn danger" id="clearChoresBtn">Clear</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="settings-title">Reset placement tracker</div>
+              <div class="settings-sub">Unticks every shift on the Placement tab — use this when a new placement starts</div>
+            </div>
+            <button class="settings-action-btn danger" id="resetPlacementBtn">Reset</button>
           </div>
           <div class="settings-row">
             <div class="settings-label">
@@ -1594,6 +1814,33 @@
       <div class="meals-scroll" id="mealsScroll">
 
         <div class="meal-day-list" id="mealDayList"></div>
+
+      </div>
+    </div>
+
+    <div class="view" id="placementView" hidden>
+      <div class="placement-scroll" id="placementScroll">
+
+        <div class="placement-hero">
+          <div class="placement-hero-deco">🩺✨👶🩺✨👶🩺✨👶🩺✨👶🩺✨👶🩺✨👶🩺✨👶🩺✨👶🩺✨👶🩺✨👶🩺✨👶🩺✨👶</div>
+          <div class="placement-hero-inner">
+            <div class="placement-eyebrow">✨ Final Placement Countdown ✨</div>
+            <div class="placement-title" id="placementTitle">Catherine's Midwifery Countdown</div>
+            <div class="placement-count-row">
+              <div class="placement-count-num" id="placementCountNum">22</div>
+              <div class="placement-count-label" id="placementCountLabel">shifts to go</div>
+            </div>
+            <div class="placement-sub" id="placementSub">Every tick is one step closer to being a qualified midwife 🎓💗</div>
+            <div class="placement-progress-track">
+              <div class="placement-progress-fill" id="placementProgressFill" style="width:0%"></div>
+            </div>
+            <div class="placement-progress-label" id="placementProgressLabel">0 of 22 shifts complete</div>
+          </div>
+        </div>
+
+        <div class="placement-complete-banner" id="placementCompleteBanner" hidden>🎉👩‍⚕️ ALL SHIFTS DONE — SHE'S QUALIFIED! 👩‍⚕️🎉</div>
+
+        <div class="placement-grid" id="placementGrid"></div>
 
       </div>
     </div>
@@ -1668,6 +1915,7 @@ const DEFAULT_SETTINGS = {
   },
   extraNameTag: { name: 'Isla', colorKey: 'rose' },
   settingsPin: '',
+  placementTotalShifts: 22,
 };
 
 function loadSettings(){
@@ -2298,12 +2546,14 @@ function setView(view){
   document.getElementById('settingsView').hidden = view !== 'settings';
   document.getElementById('weatherView').hidden = view !== 'weather';
   document.getElementById('mealsView').hidden = view !== 'meals';
+  document.getElementById('placementView').hidden = view !== 'placement';
   document.getElementById('toggleWeek').classList.toggle('active', view==='week');
   document.getElementById('toggleMonth').classList.toggle('active', view==='month');
   document.getElementById('toggleList').classList.toggle('active', view==='list');
   document.getElementById('toggleChores').classList.toggle('active', view==='chores');
   document.getElementById('toggleWeather').classList.toggle('active', view==='weather');
   document.getElementById('toggleMeals').classList.toggle('active', view==='meals');
+  document.getElementById('togglePlacement').classList.toggle('active', view==='placement');
   document.getElementById('railWeek').classList.toggle('active', view==='week');
   document.getElementById('railMonth').classList.toggle('active', view==='month');
   document.getElementById('railList').classList.toggle('active', view==='list');
@@ -2311,12 +2561,14 @@ function setView(view){
   document.getElementById('railSettings').classList.toggle('active', view==='settings');
   document.getElementById('railWeather').classList.toggle('active', view==='weather');
   document.getElementById('railMeals').classList.toggle('active', view==='meals');
-  document.getElementById('peopleRow').style.display = (view==='list' || view==='chores' || view==='settings' || view==='weather' || view==='meals') ? 'none' : 'flex';
+  document.getElementById('railPlacement').classList.toggle('active', view==='placement');
+  document.getElementById('peopleRow').style.display = (view==='list' || view==='chores' || view==='settings' || view==='weather' || view==='meals' || view==='placement') ? 'none' : 'flex';
   if(view === 'list') renderShoppingList();
   if(view === 'chores') renderChores();
   if(view === 'settings') renderSettingsView();
   if(view === 'meals') renderMealsView();
   if(view === 'weather') renderWeatherTab();
+  if(view === 'placement') renderPlacementView();
   updatePeopleRow();
 }
 
@@ -2326,12 +2578,14 @@ document.getElementById('toggleList').onclick = ()=>setView('list');
 document.getElementById('toggleChores').onclick = ()=>setView('chores');
 document.getElementById('toggleWeather').onclick = ()=>setView('weather');
 document.getElementById('toggleMeals').onclick = ()=>setView('meals');
+document.getElementById('togglePlacement').onclick = ()=>setView('placement');
 document.getElementById('railWeek').onclick = ()=>setView('week');
 document.getElementById('railMonth').onclick = ()=>setView('month');
 document.getElementById('railList').onclick = ()=>setView('list');
 document.getElementById('railChores').onclick = ()=>setView('chores');
 document.getElementById('railWeather').onclick = ()=>setView('weather');
 document.getElementById('railMeals').onclick = ()=>setView('meals');
+document.getElementById('railPlacement').onclick = ()=>setView('placement');
 document.getElementById('railSettings').onclick = ()=>requestSettingsAccess();
 document.getElementById('monthPrev').onclick = ()=>{ monthOffset--; renderMonth(); };
 document.getElementById('monthNext').onclick = ()=>{ monthOffset++; renderMonth(); };
@@ -2630,6 +2884,92 @@ document.getElementById('bulkIngredientsSaveBtn').addEventListener('click', () =
 
 setInterval(fetchMealPlan, 15 * 1000);
 fetchMealPlan();
+
+// ---------- placement countdown ----------
+// Local to this tablet (localStorage), same pattern as chores. Tracks which
+// numbered shifts have been ticked off out of a configurable total (Settings).
+const PLACEMENT_STORAGE_KEY = 'family-placement-v1';
+
+function loadPlacement(){
+  let parsed = null;
+  try{
+    const raw = localStorage.getItem(PLACEMENT_STORAGE_KEY);
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch(e){
+    parsed = null;
+  }
+  const done = (parsed && Array.isArray(parsed.done)) ? parsed.done : [];
+  return { done };
+}
+
+function savePlacement(){
+  try{ localStorage.setItem(PLACEMENT_STORAGE_KEY, JSON.stringify(placement)); } catch(e){}
+}
+
+let placement = loadPlacement();
+
+function renderPlacementView(){
+  const total = Math.max(1, appSettings.placementTotalShifts || 22);
+  const doneSet = new Set(placement.done.filter(n => n >= 1 && n <= total));
+  const doneCount = doneSet.size;
+  const remaining = total - doneCount;
+  const pct = Math.round((doneCount/total)*100);
+  const personName = (appSettings.people.mum.name || 'Her').trim() || 'Her';
+
+  document.getElementById('placementTitle').textContent = personName + "'s Midwifery Countdown";
+  document.getElementById('placementCountNum').textContent = remaining;
+  document.getElementById('placementCountLabel').textContent = remaining === 1 ? 'shift to go' : 'shifts to go';
+  document.getElementById('placementProgressFill').style.width = pct + '%';
+  document.getElementById('placementProgressLabel').textContent = doneCount + ' of ' + total + ' shifts complete';
+
+  const sub = document.getElementById('placementSub');
+  if(remaining === 0){
+    sub.textContent = 'Every single shift is done — she is officially a qualified midwife! 🎓💗';
+  } else if(remaining === 1){
+    sub.textContent = 'Just ONE shift left — so nearly there! 🎓💗';
+  } else {
+    sub.textContent = 'Every tick is one step closer to being a qualified midwife 🎓💗';
+  }
+
+  document.getElementById('placementCompleteBanner').hidden = remaining !== 0;
+
+  const grid = document.getElementById('placementGrid');
+  grid.innerHTML = '';
+  for(let n=1; n<=total; n++){
+    const isDone = doneSet.has(n);
+    const tile = document.createElement('div');
+    tile.className = 'placement-tile' + (isDone ? ' done' : '');
+    tile.innerHTML =
+      '<div class="ptile-num">'+n+'</div>'+
+      '<div class="ptile-shift-label">Shift</div>';
+    tile.addEventListener('click', () => togglePlacementShift(n));
+    grid.appendChild(tile);
+  }
+}
+
+function togglePlacementShift(n){
+  const total = Math.max(1, appSettings.placementTotalShifts || 22);
+  const doneSet = new Set(placement.done.filter(x => x >= 1 && x <= total));
+  const wasEmpty = doneSet.size === 0;
+  if(doneSet.has(n)) doneSet.delete(n); else doneSet.add(n);
+  placement.done = [...doneSet];
+  savePlacement();
+  renderPlacementView();
+
+  // Little celebratory pulses on tick — the countdown number and the tile itself.
+  const countEl = document.getElementById('placementCountNum');
+  countEl.classList.remove('pulse');
+  void countEl.offsetWidth;
+  countEl.classList.add('pulse');
+
+  const tiles = document.querySelectorAll('#placementGrid .placement-tile');
+  const tile = tiles[n-1];
+  if(tile && tile.classList.contains('done')){
+    tile.classList.remove('pulse');
+    void tile.offsetWidth;
+    tile.classList.add('pulse');
+  }
+}
 
 // ---------- chores (Charlotte / Sophie) ----------
 const CHORES_STORAGE_KEY = 'family-chores-v1';
@@ -2983,6 +3323,9 @@ function renderSettingsView(){
 
   // Security
   document.getElementById('settingsPinInput').value = appSettings.settingsPin;
+
+  // Placement countdown
+  document.getElementById('placementTotalInput').value = appSettings.placementTotalShifts;
 }
 
 document.getElementById('nightToggle').addEventListener('click', () => {
@@ -3116,6 +3459,22 @@ document.getElementById('clearChoresBtn').addEventListener('click', () => {
   renderChores();
 });
 
+document.getElementById('placementTotalSaveBtn').addEventListener('click', () => {
+  const val = parseInt(document.getElementById('placementTotalInput').value, 10);
+  if(Number.isFinite(val) && val >= 1 && val <= 999){
+    appSettings.placementTotalShifts = val;
+    saveSettings();
+    renderSettingsView();
+    if(currentView === 'placement') renderPlacementView();
+  }
+});
+
+document.getElementById('resetPlacementBtn').addEventListener('click', () => {
+  placement.done = [];
+  savePlacement();
+  if(currentView === 'placement') renderPlacementView();
+});
+
 document.getElementById('resetStarsCharlotteBtn').addEventListener('click', () => {
   chores.charlotte.stars = 0;
   chores.charlotte.items.forEach(i => i.starAwarded = false);
@@ -3141,6 +3500,7 @@ document.getElementById('resetSettingsBtn').addEventListener('click', () => {
   updateNightMode();
   tickClock();
   loadWeather();
+  if(currentView === 'placement') renderPlacementView();
 });
 
 document.getElementById('settingsPinSaveBtn').addEventListener('click', () => {
