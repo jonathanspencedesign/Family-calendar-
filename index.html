@@ -1292,6 +1292,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 1.4 1.4L11 8"/><path d="M13.5 9h5"/><path d="m7 14 1.4 1.4L11 13"/><path d="M13.5 14h5"/></svg>
     </div>
     <div class="rail-spacer"></div>
+    <div class="rail-btn" id="railCritter" title="Send a critter walking">
+      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><ellipse cx="12" cy="16.5" rx="5.5" ry="4.3"/><ellipse cx="5.8" cy="9.3" rx="2.1" ry="2.7"/><ellipse cx="10.6" cy="6.2" rx="2.1" ry="2.7"/><ellipse cx="15.6" cy="6.4" rx="2.1" ry="2.7"/><ellipse cx="19.4" cy="10.8" rx="2" ry="2.5"/></svg>
+    </div>
     <div class="rail-btn" id="railSettings" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </div>
@@ -3445,6 +3448,7 @@ const DINO_FRAMES = [
 
 // Each stroll picks one of these creatures at random.
 const CAT_CREATURES = [CAT_FRAMES, DINO_FRAMES];
+let nextCreatureIdx = 0; // alternates cat/dino each time something walks, rather than random
 
 let creatureFrameIdx = 0;
 const CAT_SPRITE_WIDTH = 160; // must match #pixelCatWrap width in CSS
@@ -3456,7 +3460,8 @@ function spawnWanderingCat(){
   }
   if(document.getElementById('pixelCatWrap')) return; // don't double up
 
-  const frames = CAT_CREATURES[Math.floor(Math.random() * CAT_CREATURES.length)];
+  const frames = CAT_CREATURES[nextCreatureIdx];
+  nextCreatureIdx = (nextCreatureIdx + 1) % CAT_CREATURES.length;
   const goingRight = Math.random() < 0.5;
   const wrap = document.createElement('div');
   wrap.id = 'pixelCatWrap';
@@ -3492,9 +3497,58 @@ function spawnWanderingCat(){
 }
 
 function scheduleNextCat(){
+  if(catTimeoutId) clearTimeout(catTimeoutId);
   const delayMs = (3 + Math.random()*6) * 60 * 1000; // next stroll in 3–9 minutes
-  setTimeout(spawnWanderingCat, delayMs);
+  catTimeoutId = setTimeout(spawnWanderingCat, delayMs);
 }
+
+let catTimeoutId = null;
+
+// Manual trigger from the rail button — bypasses the enabled toggle and night
+// pause (a deliberate tap should always work), but still won't stack a second
+// critter on screen, and cancels any pending ambient timer so the two don't
+// end up racing each other.
+function forceWanderingCat(){
+  if(document.getElementById('pixelCatWrap')) return; // already out for a walk
+  if(catTimeoutId) clearTimeout(catTimeoutId);
+
+  const frames = CAT_CREATURES[nextCreatureIdx];
+  nextCreatureIdx = (nextCreatureIdx + 1) % CAT_CREATURES.length;
+  const goingRight = Math.random() < 0.5;
+  const wrap = document.createElement('div');
+  wrap.id = 'pixelCatWrap';
+  const img = document.createElement('img');
+  img.src = frames[0];
+  wrap.appendChild(img);
+  if(!goingRight) wrap.classList.add('walk-flip');
+
+  const vw = window.innerWidth;
+  const startLeft = goingRight ? -CAT_SPRITE_WIDTH : vw + CAT_SPRITE_WIDTH;
+  const endLeft = goingRight ? vw + CAT_SPRITE_WIDTH : -CAT_SPRITE_WIDTH;
+  const duration = 14 + Math.random()*8;
+
+  wrap.style.left = startLeft + 'px';
+  wrap.style.transitionDuration = duration + 's';
+  document.body.appendChild(wrap);
+
+  creatureFrameIdx = 0;
+  const legTimer = setInterval(() => {
+    creatureFrameIdx = (creatureFrameIdx + 1) % frames.length;
+    img.src = frames[creatureFrameIdx];
+  }, 110);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { wrap.style.left = endLeft + 'px'; });
+  });
+
+  wrap.addEventListener('transitionend', () => {
+    clearInterval(legTimer);
+    wrap.remove();
+    scheduleNextCat();
+  });
+}
+
+document.getElementById('railCritter').onclick = () => forceWanderingCat();
 
 scheduleNextCat();
 
