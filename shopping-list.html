@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shopping List</title>
+<title>Family Lists</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -14,7 +14,9 @@
     --ink: #2E2B27;
     --ink-mid: #8B857C;
     --accent: #7FCFC1;
+    --accent-todo: #F6C77C;
   }
+  body.tab-todo{ --accent: var(--accent-todo); }
   *{ box-sizing:border-box; margin:0; padding:0; }
   html, body{
     width:100%; min-height:100%;
@@ -39,6 +41,32 @@
     color:var(--ink-mid);
     margin-bottom:18px;
   }
+  .tab-row{
+    display:flex;
+    gap:6px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:4px;
+    margin-bottom:16px;
+  }
+  .tab-btn{
+    flex:1;
+    border:none;
+    background:transparent;
+    color:var(--ink-mid);
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:10px 0;
+    border-radius:9px;
+    cursor:pointer;
+  }
+  .tab-btn.active{
+    background:var(--ink);
+    color:#fff;
+  }
+
   .add-row{
     display:flex;
     gap:8px;
@@ -126,8 +154,13 @@
 <body>
 
 <div class="wrap">
-  <h1>🛒 Shopping List</h1>
+  <h1 id="pageTitle">🛒 Shopping List</h1>
   <div class="subtitle">Shared with the family — changes sync automatically</div>
+
+  <div class="tab-row">
+    <button class="tab-btn" id="tabShopping">🛒 Shopping</button>
+    <button class="tab-btn" id="tabTodo">✅ To-do</button>
+  </div>
 
   <div class="add-row">
     <input type="text" id="itemInput" placeholder="Add an item…" autocomplete="off">
@@ -142,33 +175,75 @@
 <script>
 // Point this at your Worker's URL (same one the dashboard uses).
 const WORKER_URL = 'https://family-calendar.jonathanspencedesign.workers.dev/';
-const LIST_ENDPOINT = new URL('/list', WORKER_URL).toString();
-const CACHE_KEY = 'family-shopping-list-v1'; // same key the tablet dashboard uses, for a consistent local fallback
 
-let items = loadCache();
-let lastSynced = null;
+// Each tab is just a { endpoint, cacheKey, items, placeholder, title, emptyText }
+// bundle — same shape and same sync logic, pointed at a different Worker path
+// and localStorage key so the two lists never mix.
+const TABS = {
+  shopping: {
+    endpoint: new URL('/list', WORKER_URL).toString(),
+    cacheKey: 'family-shopping-list-v1', // same key the tablet dashboard uses, for a consistent local fallback
+    title: '🛒 Shopping List',
+    placeholder: 'Add an item…',
+    emptyText: 'List\'s empty — add something above.',
+    items: [],
+  },
+  todo: {
+    endpoint: new URL('/todos', WORKER_URL).toString(),
+    cacheKey: 'family-todo-v1', // same key the tablet dashboard uses
+    title: '✅ To-do List',
+    placeholder: 'Add a to-do…',
+    emptyText: 'Nothing to do — add something above.',
+    items: [],
+  },
+};
 
-function loadCache(){
+const TAB_STORAGE_KEY = 'family-lists-active-tab-v1';
+let activeTab = (localStorage.getItem(TAB_STORAGE_KEY) === 'todo') ? 'todo' : 'shopping';
+
+Object.entries(TABS).forEach(([key, tab]) => { tab.items = loadCache(tab.cacheKey); });
+
+function loadCache(cacheKey){
   try{
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(cacheKey);
     return raw ? JSON.parse(raw) : [];
   } catch(e){ return []; }
 }
 
-function saveCache(){
-  try{ localStorage.setItem(CACHE_KEY, JSON.stringify(items)); } catch(e){}
+function saveCache(tab){
+  try{ localStorage.setItem(tab.cacheKey, JSON.stringify(tab.items)); } catch(e){}
+}
+
+function currentTab(){ return TABS[activeTab]; }
+
+function renderTabs(){
+  document.getElementById('tabShopping').classList.toggle('active', activeTab === 'shopping');
+  document.getElementById('tabTodo').classList.toggle('active', activeTab === 'todo');
+  document.body.classList.toggle('tab-todo', activeTab === 'todo');
+  document.getElementById('pageTitle').textContent = currentTab().title;
+  document.getElementById('itemInput').placeholder = currentTab().placeholder;
+}
+
+function switchTab(tab){
+  if(activeTab === tab) return;
+  activeTab = tab;
+  try{ localStorage.setItem(TAB_STORAGE_KEY, activeTab); } catch(e){}
+  renderTabs();
+  render();
+  fetchList();
 }
 
 function render(){
+  const tab = currentTab();
   const container = document.getElementById('items');
   container.innerHTML = '';
 
-  if(items.length === 0){
-    container.innerHTML = '<div class="empty-state">List\'s empty — add something above.</div>';
+  if(tab.items.length === 0){
+    container.innerHTML = '<div class="empty-state">' + tab.emptyText + '</div>';
     return;
   }
 
-  const sorted = [...items].sort((a,b) => (a.done === b.done) ? 0 : (a.done ? 1 : -1));
+  const sorted = [...tab.items].sort((a,b) => (a.done === b.done) ? 0 : (a.done ? 1 : -1));
   sorted.forEach(item => {
     const row = document.createElement('div');
     row.className = 'list-item' + (item.done ? ' done' : '');
@@ -199,14 +274,14 @@ function updateStatus(text){
 }
 
 async function fetchList(){
+  const tab = currentTab();
   try{
-    const res = await fetch(LIST_ENDPOINT, { cache: 'no-store' });
+    const res = await fetch(tab.endpoint, { cache: 'no-store' });
     if(!res.ok) throw new Error('fetch failed: ' + res.status);
     const data = await res.json();
-    items = Array.isArray(data.items) ? data.items : [];
-    saveCache();
-    render();
-    lastSynced = new Date();
+    tab.items = Array.isArray(data.items) ? data.items : [];
+    saveCache(tab);
+    if(tab === currentTab()) render();
     updateStatus('Synced just now');
   } catch(err){
     console.error(err);
@@ -215,14 +290,14 @@ async function fetchList(){
 }
 
 async function pushList(){
-  saveCache();
+  const tab = currentTab();
+  saveCache(tab);
   try{
-    await fetch(LIST_ENDPOINT, {
+    await fetch(tab.endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items: tab.items }),
     });
-    lastSynced = new Date();
     updateStatus('Synced just now');
   } catch(err){
     console.error(err);
@@ -233,21 +308,25 @@ async function pushList(){
 function addItem(text){
   const trimmed = text.trim();
   if(!trimmed) return;
-  items.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), text: trimmed, done: false });
+  currentTab().items.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), text: trimmed, done: false });
   render();
   pushList();
 }
 
 function toggleItem(id){
-  const item = items.find(i => i.id === id);
+  const item = currentTab().items.find(i => i.id === id);
   if(item){ item.done = !item.done; render(); pushList(); }
 }
 
 function deleteItem(id){
-  items = items.filter(i => i.id !== id);
+  const tab = currentTab();
+  tab.items = tab.items.filter(i => i.id !== id);
   render();
   pushList();
 }
+
+document.getElementById('tabShopping').addEventListener('click', () => switchTab('shopping'));
+document.getElementById('tabTodo').addEventListener('click', () => switchTab('todo'));
 
 document.getElementById('addBtn').addEventListener('click', () => {
   const input = document.getElementById('itemInput');
@@ -263,7 +342,9 @@ document.getElementById('itemInput').addEventListener('keydown', (e) => {
 });
 
 // Refresh from the server periodically, and whenever the page becomes visible
-// again (e.g. switching back to this tab/app on the phone).
+// again (e.g. switching back to this tab/app on the phone). Only the active
+// tab's list is fetched at any given moment.
+renderTabs();
 render();
 fetchList();
 setInterval(fetchList, 15 * 1000);
